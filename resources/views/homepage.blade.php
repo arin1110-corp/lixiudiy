@@ -104,4 +104,18 @@
             slideProduk(0);
             slideKategori(0);
         });
+        let slideIndex = 0;
+        const slides = document.querySelectorAll(".slider img");
+
+        function showSlides() {
+            slides.forEach(slide => slide.classList.remove("active"));
+            slideIndex = (slideIndex + 1) > slides.length ? 1 : slideIndex + 1;
+            slides[slideIndex - 1].classList.add("active");
+        }
+
+        // Pertama tampilkan gambar awal
+        slides[0].classList.add("active");
+
+        // Auto slide tiap 4 detik
+        setInterval(showSlides, 4000);
     </script>

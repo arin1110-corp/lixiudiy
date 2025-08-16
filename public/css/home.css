@@ -54,20 +54,25 @@ body {
 
 /* SLIDER */
 .slider {
-    width: 100%;
+    position: relative;
+    max-width: 100%;
+    height: 400px;
     overflow: hidden;
-    max-height: 450px;
 }
-.slides img {
+
+.slider img {
     width: 100%;
-    height: auto;
-    display: none;
+    height: 100%;
     object-fit: cover;
+    display: none; /* sembunyikan semua dulu */
 }
-.fade {
-    animation: fadeEffect 1s ease-in-out;
+
+.slider img.active {
+    display: block; /* tampilkan yang aktif */
+    animation: fade 1s;
 }
-@keyframes fadeEffect {
+
+@keyframes fade {
     from {
         opacity: 0.4;
     }
