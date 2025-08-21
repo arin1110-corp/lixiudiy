@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AdministratorKontrol;
+use Google\Service\Dfareporting\Ad;
 
 Route::get('/', function () {
     return view('homepage');
@@ -61,3 +63,21 @@ Route::get('/admin-login-submit', function () {
     // Logic for admin login can be added here
     return redirect()->route('admin.dashboard');
 })->name('admin.login.submit');
+
+
+//ADMIN SECTION
+Route::get('/dashboard', [AdministratorKontrol::class, 'index'])->name('dashboard');
+Route::get('/admin-login', [AdministratorKontrol::class, 'login'])->name('admin.login');
+Route::post('/admin-login-submit', [AdministratorKontrol::class, 'loginSubmit'])->name('admin.login.submit');
+Route::get('/admin-logout', [AdministratorKontrol::class, 'logout'])->name('admin.logout');
+Route::get('/admin/produk', [AdministratorKontrol::class, 'produk'])->name('admin.produk');
+
+
+Route::get('/admin/kategori', [AdministratorKontrol::class, 'kategori'])->name('admin.kategori');
+Route::post('/admin/kategori/simpan', [AdministratorKontrol::class, 'simpanKategori'])->name('admin.kategori.simpan');
+Route::put('/admin/kategori/update/{id}', [AdministratorKontrol::class, 'updateKategori'])->name('admin.kategori.update');
+Route::delete('/admin/kategori/delete/{id}', [AdministratorKontrol::class, 'hapusKategori'])->name('admin.kategori.hapus');
+
+Route::get('/admin/customer', [AdministratorKontrol::class, 'customer'])->name('admin.customer');
+Route::get('/admin/rekomendasi', [AdministratorKontrol::class, 'rekomendasi'])->name('admin.rekomendasi');
+Route::get('/admin/pengiriman', [AdministratorKontrol::class, 'pengiriman'])->name('admin.pengiriman');
