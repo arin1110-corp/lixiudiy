@@ -69,7 +69,7 @@ class AdministratorKontrol extends Controller
     {
         $request->validate([
             'kategori_nama' => 'required|string|max:255',
-            'kategori_deskripsi' => 'nullable|string|max:500',
+            'kategori_deskripsi' => 'nullable|string',
             'kategori_gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'kategori_status' => 'required|integer',
         ]);
@@ -96,7 +96,7 @@ class AdministratorKontrol extends Controller
     {
         $request->validate([
             'kategori_nama' => 'required|string|max:255',
-            'kategori_deskripsi' => 'nullable|string|max:500',
+            'kategori_deskripsi' => 'nullable|string',
             'kategori_gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'kategori_status' => 'required|integer',
         ]);
@@ -125,8 +125,113 @@ class AdministratorKontrol extends Controller
     public function hapusKategori($id)
     {
         $kategori = ModelKategori::findOrFail($id);
+
+        // Hapus file gambar kalau ada
+        if ($kategori->kategori_gambar && file_exists(public_path($kategori->kategori_gambar))) {
+            unlink(public_path($kategori->kategori_gambar));
+        }
+
+        // Hapus data dari database
         $kategori->delete();
 
-        return redirect()->route('admin.kategori')->with('success', 'Kategori berhasil dihapus.');
+        return redirect()->back()->with('success', 'Data kategori berhasil dihapus beserta gambarnya.');
+    }
+
+    //Akhir Kelola Data Kategori
+
+    // Kelola Data Produk
+    public function produk()
+    {
+        $produk = ModelProduk::join('lixiudiy_kategori', 'lixiudiy_produk.produk_kategori', '=', 'lixiudiy_kategori.kategori_id')
+            ->select('lixiudiy_produk.*', 'lixiudiy_kategori.kategori_nama')
+            ->get();
+        $kategori = ModelKategori::all();
+        return view('admin.produk', compact('produk', 'kategori'));
+    }
+    public function simpanProduk(Request $request)
+    {
+        $request->validate([
+            'produk_nama' => 'required|string|max:255',
+            'produk_deskripsi' => 'nullable|string',
+            'produk_harga' => 'required|numeric',
+            'produk_tanggalmasuk' => 'nullable|date',
+            'produk_stok' => 'required|integer',
+            'produk_gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'produk_kategori' => 'required',
+            'produk_status' => 'required|integer',
+        ]);
+        $produktanggalmasuk = $request->produk_tanggalmasuk ? date('Y-m-d', strtotime($request->produk_tanggalmasuk)) : null;
+
+        $gambarPath = null;
+
+        if ($request->hasFile('produk_gambar')) {
+            $gambar = $request->file('produk_gambar');
+            $namaFile = time() . '_' . $gambar->getClientOriginalName();
+            $gambar->move(public_path('images/produk'), $namaFile);
+            $gambarPath = 'images/produk/' . $namaFile;
+        }
+
+        ModelProduk::create([
+            'produk_nama' => $request->produk_nama,
+            'produk_deskripsi' => $request->produk_deskripsi,
+            'produk_harga' => $request->produk_harga,
+            'produk_tanggalmasuk' => $produktanggalmasuk,
+            'produk_stok' => $request->produk_stok,
+            'produk_gambar' => $gambarPath,
+            'produk_kategori' => $request->produk_kategori,
+            'produk_status' => $request->produk_status ? 1 : 0,
+        ]);
+
+        return redirect()->route('admin.produk')->with('success', 'Produk berhasil ditambahkan.');
+    }
+    public function updateProduk(Request $request, $id)
+    {
+        $request->validate([
+            'produk_nama' => 'required|string|max:255',
+            'produk_deskripsi' => 'nullable|string',
+            'produk_harga' => 'required|numeric',
+            'produk_tanggalmasuk' => 'nullable|date',
+            'produk_stok' => 'required|integer',
+            'produk_gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'produk_kategori' => 'required',
+            'produk_status' => 'required|integer',
+        ]);
+        $produktanggalmasuk = $request->produk_tanggalmasuk ? date('Y-m-d', strtotime($request->produk_tanggalmasuk)) : null;
+        $produk = ModelProduk::findOrFail($id);
+        $produk->produk_nama = $request->produk_nama;
+        $produk->produk_deskripsi = $request->produk_deskripsi;
+        $produk->produk_harga = $request->produk_harga;
+        $produk->produk_tanggalmasuk = $produktanggalmasuk;
+        $produk->produk_stok = $request->produk_stok;
+        $produk->produk_kategori = $request->produk_kategori;
+        $produk->produk_status = $request->produk_status ? 1 : 0;
+        // Kalau ada gambar baru, simpan
+        if ($request->hasFile('produk_gambar')) {
+            // hapus gambar lama kalau ada
+            if ($produk->produk_gambar && file_exists(public_path($produk->produk_gambar))) {
+                unlink(public_path($produk->produk_gambar));
+            }
+            // simpan gambar baru di public/images/produk
+            $gambar = $request->file('produk_gambar');
+            $namaFile = time() . '_' . $gambar->getClientOriginalName();
+            $gambar->move(public_path('images/produk'), $namaFile);
+            $produk->produk_gambar = 'images/produk/' . $namaFile;
+        }
+        $produk->save();
+        return redirect()->route('admin.produk')->with('success', 'Produk berhasil diperbarui.');
+    }
+    public function hapusProduk($id)
+    {
+        $produk = ModelProduk::findOrFail($id);
+
+        // Hapus file gambar kalau ada
+        if ($produk->produk_gambar && file_exists(public_path($produk->produk_gambar))) {
+            unlink(public_path($produk->produk_gambar));
+        }
+
+        // Hapus data dari database
+        $produk->delete();
+
+        return redirect()->back()->with('success', 'Data produk berhasil dihapus beserta gambarnya.');
     }
 }

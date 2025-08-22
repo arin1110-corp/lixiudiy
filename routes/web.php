@@ -2,11 +2,15 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdministratorKontrol;
+use App\Http\Controllers\HomepageKontrol;
 use Google\Service\Dfareporting\Ad;
 
-Route::get('/', function () {
-    return view('homepage');
-});
+Route::get('/', [HomepageKontrol::class, 'index'])->name('home');
+Route::get('/tentang-kami', [HomepageKontrol::class, 'about'])->name('tentangkami');
+Route::get('/kontak-kami', [HomepageKontrol::class, 'contact'])->name('kontak');
+Route::get('/produk', function () {
+    return view('daftarproduk');
+})->name('produk');
 Route::get('/home', function () {
     return view('homepage');
 })->name('home');
@@ -70,7 +74,13 @@ Route::get('/dashboard', [AdministratorKontrol::class, 'index'])->name('dashboar
 Route::get('/admin-login', [AdministratorKontrol::class, 'login'])->name('admin.login');
 Route::post('/admin-login-submit', [AdministratorKontrol::class, 'loginSubmit'])->name('admin.login.submit');
 Route::get('/admin-logout', [AdministratorKontrol::class, 'logout'])->name('admin.logout');
+
+
 Route::get('/admin/produk', [AdministratorKontrol::class, 'produk'])->name('admin.produk');
+Route::post('/admin/produk/simpan', [AdministratorKontrol::class, 'simpanProduk'])->name('admin.produk.simpan');
+Route::put('/admin/produk/update/{id}', [AdministratorKontrol::class, 'updateProduk'])->name('admin.produk.update');
+Route::delete('/admin/produk/delete/{id}', [AdministratorKontrol::class, 'hapusProduk'])->name('admin.produk.hapus');
+
 
 
 Route::get('/admin/kategori', [AdministratorKontrol::class, 'kategori'])->name('admin.kategori');
