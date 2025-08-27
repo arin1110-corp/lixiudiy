@@ -234,4 +234,56 @@ class AdministratorKontrol extends Controller
 
         return redirect()->back()->with('success', 'Data produk berhasil dihapus beserta gambarnya.');
     }
+
+    //Akhir Kelola Data Produk
+
+    // Kelola Data Rekomendasi Produk
+    public function rekomendasi()
+    {
+        $rekomendasi = ModelRekomendasiProduk::join('lixiudiy_produk', 'lixiudiy_rekomendasi_produk.rekomendasi_produk', '=', 'lixiudiy_produk.produk_id')
+            ->join('lixiudiy_kategori', 'lixiudiy_produk.produk_kategori', '=', 'lixiudiy_kategori.kategori_id')
+            ->select('lixiudiy_rekomendasi_produk.*', 'lixiudiy_produk.produk_nama', 'lixiudiy_produk.produk_harga', 'lixiudiy_produk.produk_stok', 'lixiudiy_kategori.kategori_nama')
+            ->get();
+        $produk = ModelProduk::all();
+        return view('admin.rekomendasi', compact('rekomendasi', 'produk'));
+    }
+    public function simpanRekomendasi(Request $request)
+    {
+        $request->validate([
+            'rekomendasi_nama' => 'required|string|max:255',
+            'rekomendasi_tanggal' => 'nullable|date',
+            'rekomendasi_produk' => 'required',
+            'rekomendasi_status' => 'required|integer',
+            'rekomendasi_keterangan' => 'nullable|string',
+        ]);
+        ModelRekomendasiProduk::create([
+            'rekomendasi_nama' => $request->rekomendasi_nama,
+            'rekomendasi_tanggal' => $request->rekomendasi_tanggal ? date('Y-m-d', strtotime($request->rekomendasi_tanggal)) : null,
+            'rekomendasi_produk' => $request->rekomendasi_produk,
+            'rekomendasi_status' => $request->rekomendasi_status ? 1 : 0,
+            'rekomendasi_keterangan' => $request->rekomendasi_keterangan,
+        ]);
+        return redirect()->route('admin.rekomendasi')->with('success', 'Rekomendasi produk berhasil ditambahkan.');
+    }
+    public function updateRekomendasi(Request $request, $id)
+    {
+        $request->validate([
+            'rekomendasi_nama' => 'required|string|max:255',
+            'rekomendasi_produk' => 'required',
+            'rekomendasi_status' => 'required|integer',
+        ]);
+        $rekomendasi = ModelRekomendasiProduk::findOrFail($id);
+        $rekomendasi->rekomendasi_nama = $request->rekomendasi_nama;
+        $rekomendasi->rekomendasi_produk = $request->rekomendasi_produk;
+        $rekomendasi->rekomendasi_status = $request->rekomendasi_status ? 1 : 0;
+        $rekomendasi->save();
+        return redirect()->route('admin.rekomendasi')->with('success', 'Rekomendasi produk berhasil diperbarui.');
+    }
+    public function hapusRekomendasi($id)
+    {
+        $rekomendasi = ModelRekomendasiProduk::findOrFail($id);
+        // Hapus data dari database
+        $rekomendasi->delete();
+        return redirect()->back()->with('success', 'Data rekomendasi produk berhasil dihapus.');
+    }
 }

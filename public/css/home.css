@@ -132,6 +132,47 @@ body {
     font-weight: bold;
     color: #27ae60;
 }
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 kolom seragam */
+    gap: 20px; /* jarak antar card */
+}
+
+.product-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    background: #fff;
+    text-align: center;
+    max-width: 250px; /* batasi lebar */
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.product-card img {
+    width: 100%;
+    height: 150px; /* tinggi fix agar seragam */
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.product-card h3 {
+    font-size: 16px;
+    margin: 10px 0;
+    white-space: nowrap; /* biar nggak pecah */
+    overflow: hidden; /* sembunyikan yg kelebihan */
+    text-overflow: ellipsis; /* kasih "..." kalau panjang */
+}
+
+.product-card p {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.4em;
+    height: 4.2em; /* kira-kira 3 baris */
+    overflow: hidden;
+}
 
 /* KATEGORI PRODUK */
 .kategori {

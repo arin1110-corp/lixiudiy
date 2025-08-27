@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Homepage Crochet Lixiu DIY</title>
+    <link rel="icon" href="{{ asset('images/logo.png') }}" type="image/png">
     <link rel="stylesheet" href="{{ asset('css/home.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
@@ -31,18 +32,20 @@
         <div class="slider-wrapper">
             <button class="prev" onclick="slideProduk(-1)">&#10094;</button>
             <div class="product-grid" id="product-slider">
-                @for ($i = 1; $i <= 8; $i++) <div class="product-card">
-                    <img src="{{ asset("images/produk/product$i.jpg") }}" alt="Produk {{ $i }}">
-                    <h3>Produk {{ $i }}</h3>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                @foreach ($rekomendasi as $rekomendasip)
+                <div class="product-card">
+                    <img src="{{ $rekomendasip->produk_gambar }}" alt="{{ $rekomendasip->produk_nama }}">
+                    <h3>{{ $rekomendasip->rekomendasi_nama }}</h3>
+                    <p>{{ \Illuminate\Support\Str::words($rekomendasip->produk_deskripsi, 20, '...') }}</p>
                     <a href="#">More</a>
-                    <div class="harga">Rp {{ number_format(50000 * $i, 0, ',', '.') }}</div>
+                    <div class="harga">Rp {{ number_format($rekomendasip->produk_harga, 0, ',', '.') }}</div>
+                </div>
+                @endforeach
             </div>
-            @endfor
-        </div>
-        <button class="next" onclick="slideProduk(1)">&#10095;</button>
+            <button class="next" onclick="slideProduk(1)">&#10095;</button>
         </div>
     </section>
+
 
     {{-- KATEGORI PRODUK --}}
     <section class="kategori">
@@ -50,11 +53,10 @@
         <div class="slider-wrapper">
             <button class="prev" onclick="slideKategori(-1)">&#10094;</button>
             <div class="kategori-grid" id="kategori-slider">
-                @foreach (['Tas', 'Baju', 'Aksesori','Sepatu','Topi','Sweater'] as $kategori)
+                @foreach ($kategori as $kategorip)
                 <div class="kategori-card">
-                    <img src="{{ asset('images/kategori/kategori-' . strtolower($kategori) . '.jpg') }}"
-                        alt="{{ $kategori }}">
-                    <h3>{{ $kategori }}</h3>
+                    <img src="{{ $kategorip->kategori_gambar}}" alt="{{ $kategorip->kategori_nama }}">
+                    <h3>{{ $kategorip->kategori_nama }}</h3>
                 </div>
                 @endforeach
             </div>
@@ -67,55 +69,55 @@
     @include('partials.footer')
 
     <script>
-        let produkIndex = 0;
-        let kategoriIndex = 0;
+    let produkIndex = 0;
+    let kategoriIndex = 0;
 
-        const produkGrid = document.getElementById("product-slider");
-        const kategoriGrid = document.getElementById("kategori-slider");
-        const produkItems = produkGrid.children;
-        const kategoriItems = kategoriGrid.children;
+    const produkGrid = document.getElementById("product-slider");
+    const kategoriGrid = document.getElementById("kategori-slider");
+    const produkItems = produkGrid.children;
+    const kategoriItems = kategoriGrid.children;
 
-        function getVisibleCount(gridElement) {
-            const wrapperWidth = gridElement.parentElement.offsetWidth; // lebar viewport
-            const itemWidth = gridElement.children[0].offsetWidth; // lebar 1 item
-            return Math.floor(wrapperWidth / itemWidth) || 1;
-        }
+    function getVisibleCount(gridElement) {
+        const wrapperWidth = gridElement.parentElement.offsetWidth; // lebar viewport
+        const itemWidth = gridElement.children[0].offsetWidth; // lebar 1 item
+        return Math.floor(wrapperWidth / itemWidth) || 1;
+    }
 
-        function slideProduk(step) {
-            const visible = getVisibleCount(produkGrid);
-            const maxIndex = Math.max(produkItems.length - visible, 0);
-            produkIndex = (produkIndex + step + (maxIndex + 1)) % (maxIndex + 1);
-            produkGrid.style.transform = `translateX(-${produkIndex * (100 / visible)}%)`;
-        }
+    function slideProduk(step) {
+        const visible = getVisibleCount(produkGrid);
+        const maxIndex = Math.max(produkItems.length - visible, 0);
+        produkIndex = (produkIndex + step + (maxIndex + 1)) % (maxIndex + 1);
+        produkGrid.style.transform = `translateX(-${produkIndex * (100 / visible)}%)`;
+    }
 
-        function slideKategori(step) {
-            const visible = getVisibleCount(kategoriGrid);
-            const maxIndex = Math.max(kategoriItems.length - visible, 0);
-            kategoriIndex = (kategoriIndex + step + (maxIndex + 1)) % (maxIndex + 1);
-            kategoriGrid.style.transform = `translateX(-${kategoriIndex * (100 / visible)}%)`;
-        }
+    function slideKategori(step) {
+        const visible = getVisibleCount(kategoriGrid);
+        const maxIndex = Math.max(kategoriItems.length - visible, 0);
+        kategoriIndex = (kategoriIndex + step + (maxIndex + 1)) % (maxIndex + 1);
+        kategoriGrid.style.transform = `translateX(-${kategoriIndex * (100 / visible)}%)`;
+    }
 
-        // Auto slide
-        setInterval(() => slideProduk(1), 4000);
-        setInterval(() => slideKategori(1), 5000);
+    // Auto slide
+    setInterval(() => slideProduk(1), 4000);
+    setInterval(() => slideKategori(1), 5000);
 
-        // Resize
-        window.addEventListener("resize", () => {
-            slideProduk(0);
-            slideKategori(0);
-        });
-        let slideIndex = 0;
-        const slides = document.querySelectorAll(".slider img");
+    // Resize
+    window.addEventListener("resize", () => {
+        slideProduk(0);
+        slideKategori(0);
+    });
+    let slideIndex = 0;
+    const slides = document.querySelectorAll(".slider img");
 
-        function showSlides() {
-            slides.forEach(slide => slide.classList.remove("active"));
-            slideIndex = (slideIndex + 1) > slides.length ? 1 : slideIndex + 1;
-            slides[slideIndex - 1].classList.add("active");
-        }
+    function showSlides() {
+        slides.forEach(slide => slide.classList.remove("active"));
+        slideIndex = (slideIndex + 1) > slides.length ? 1 : slideIndex + 1;
+        slides[slideIndex - 1].classList.add("active");
+    }
 
-        // Pertama tampilkan gambar awal
-        slides[0].classList.add("active");
+    // Pertama tampilkan gambar awal
+    slides[0].classList.add("active");
 
-        // Auto slide tiap 4 detik
-        setInterval(showSlides, 4000);
+    // Auto slide tiap 4 detik
+    setInterval(showSlides, 4000);
     </script>

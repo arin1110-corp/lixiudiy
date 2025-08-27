@@ -2,6 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ModelProduk;
+use App\Models\ModelAdmin;
+use App\Models\ModelKategori;
+use App\Models\ModelCustomer;
+use App\Models\ModelPengiriman;
+use App\Models\ModelPembayaran;
+use App\Models\ModelPesanan;
+use App\Models\ModelKeranjang;
+use App\Models\ModelLaporanPenjualan;
+use App\Models\ModelRekomendasiProduk;
 use Illuminate\Http\Request;
 
 class HomepageKontrol extends Controller
@@ -9,7 +19,18 @@ class HomepageKontrol extends Controller
     //
     public function index()
     {
-        return view('homepage');
+        $produk = ModelProduk::join('lixiudiy_kategori', 'lixiudiy_produk.produk_kategori', '=', 'lixiudiy_kategori.kategori_id')
+            ->select('lixiudiy_produk.*', 'lixiudiy_kategori.kategori_nama')
+            ->get();
+        $kategori = ModelKategori::all();
+        $rekomendasi = ModelRekomendasiProduk::join('lixiudiy_produk', 'lixiudiy_rekomendasi_produk.rekomendasi_produk', '=', 'lixiudiy_produk.produk_id')
+            ->select('lixiudiy_rekomendasi_produk.*', 'lixiudiy_produk.produk_nama', 'lixiudiy_produk.*', 'lixiudiy_produk.produk_harga', 'lixiudiy_produk.produk_gambar')
+            ->get();
+        return view('homepage', [
+            'produk' => $produk,
+            'kategori' => $kategori,
+            'rekomendasi' => $rekomendasi,
+        ]);
     }
     public function about()
     {
@@ -21,11 +42,43 @@ class HomepageKontrol extends Controller
     }
     public function produk()
     {
-        return view('daftarproduk');
+        $produk = ModelProduk::join('lixiudiy_kategori', 'lixiudiy_produk.produk_kategori', '=', 'lixiudiy_kategori.kategori_id')
+            ->select('lixiudiy_produk.*', 'lixiudiy_kategori.kategori_nama')
+            ->paginate(12);
+        $kategori = ModelKategori::all();
+        $rekomendasi = ModelRekomendasiProduk::join('lixiudiy_produk', 'lixiudiy_rekomendasi_produk.rekomendasi_produk', '=', 'lixiudiy_produk.produk_id')
+            ->select('lixiudiy_rekomendasi_produk.*', 'lixiudiy_produk.produk_nama', 'lixiudiy_produk.*', 'lixiudiy_produk.produk_harga', 'lixiudiy_produk.produk_gambar')
+            ->get();
+        return view('daftarproduk', compact('produk', 'kategori', 'rekomendasi'));
     }
-    public function detailProduk()
+    public function detailProduk($id)
     {
-        return view('detailproduk');
+        $produk = ModelProduk::findOrFail($id)
+            ->join('lixiudiy_kategori', 'lixiudiy_produk.produk_kategori', '=', 'lixiudiy_kategori.kategori_id')
+            ->select('lixiudiy_produk.*', 'lixiudiy_kategori.kategori_nama')
+            ->where('lixiudiy_produk.produk_id', $id)
+            ->first();
+        $produklain = ModelProduk::join('lixiudiy_kategori', 'lixiudiy_produk.produk_kategori', '=', 'lixiudiy_kategori.kategori_id')
+            ->select('lixiudiy_produk.*', 'lixiudiy_kategori.kategori_nama')
+            ->paginate(12);
+        $kategori = ModelKategori::all();
+        $rekomendasi = ModelRekomendasiProduk::join('lixiudiy_produk', 'lixiudiy_rekomendasi_produk.rekomendasi_produk', '=', 'lixiudiy_produk.produk_id')
+            ->select('lixiudiy_rekomendasi_produk.*', 'lixiudiy_produk.produk_nama', 'lixiudiy_produk.*', 'lixiudiy_produk.produk_harga', 'lixiudiy_produk.produk_gambar')
+            ->get();
+        return view('detailproduk', compact('produk', 'kategori', 'rekomendasi', 'produklain'));
+    }
+    public function daftarprodukkategori($id)
+    {
+        $produk = ModelProduk::join('lixiudiy_kategori', 'lixiudiy_produk.produk_kategori', '=', 'lixiudiy_kategori.kategori_id')
+            ->select('lixiudiy_produk.*', 'lixiudiy_kategori.kategori_nama')
+            ->where('lixiudiy_kategori.kategori_id', $id)
+            ->paginate(6);
+
+        $kategori = ModelKategori::all();
+        $rekomendasi = ModelRekomendasiProduk::join('lixiudiy_produk', 'lixiudiy_rekomendasi_produk.rekomendasi_produk', '=', 'lixiudiy_produk.produk_id')
+            ->select('lixiudiy_rekomendasi_produk.*', 'lixiudiy_produk.produk_nama', 'lixiudiy_produk.*', 'lixiudiy_produk.produk_harga', 'lixiudiy_produk.produk_gambar')
+            ->get();
+        return view('daftarproduk', compact('produk', 'kategori', 'rekomendasi'));
     }
     public function keranjang()
     {

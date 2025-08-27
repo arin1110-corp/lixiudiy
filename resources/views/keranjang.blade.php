@@ -4,6 +4,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" href="{{ asset('images/logo.png') }}" type="image/png">
     <title>Keranjang - MyShop</title>
     <link rel="stylesheet" href="{{ asset('css/home.css') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">

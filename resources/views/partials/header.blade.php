@@ -1,7 +1,9 @@
 <header class="header shadow">
-    <div class="logo">
-        <img src="{{ asset('images/logo.png') }}" alt="Logo Toko">
-    </div>
+    <a href="{{ route('home.page') }}" class="menu-icon" id="menu-icon">
+        <div class="logo">
+            <img src="{{ asset('images/logo.png') }}" alt="Logo Toko">
+        </div>
+    </a>
     @include('partials.menu')
     <div class="icons">
         <a href="#"><i class="fas fa-shopping-cart"></i></a>
