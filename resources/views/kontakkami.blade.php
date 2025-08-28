@@ -21,14 +21,14 @@
             {{-- Kiri: Map + Alamat --}}
             <div class="map-container">
                 <iframe
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3944.1177686903063!2d115.22979807419809!3d-8.67268188826337!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dd2471abcfad18d%3A0x19f3945cc74d77bb!2sLapangan%20Puputan%20Niti%20Mandala%20Renon!5e0!3m2!1sid!2sid!4v1691813130521!5m2!1sid!2sid"
-                    width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy">
+                    src="!1m18!1m12!1m3!1d3949.311205304852!2d113.70866627575523!3d-8.171369481897127!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dd6943274ac3921%3A0xfc4510ffe97c1c55!2sJl.%20Nias%20No.10%2C%20Tegal%20Boto%20Lor%2C%20Sumbersari%2C%20Kec.%20Sumbersari%2C%20Kabupaten%20Jember%2C%20Jawa%20Timur%2068121!5e0!3m2!1sid!2sid!4v1756359677155!5m2!1sid!2sid"
+                    width=" 100%" height="300" style="border:0;" allowfullscreen="" loading="lazy">
                 </iframe>
 
                 <div class="alamat">
                     <h3>Alamat Kami</h3>
-                    <p>Jl. Raya Puputan, Niti Mandala, Renon,<br>
-                        Denpasar, Bali 80235</p>
+                    <p>Jl. Nias No.10, Tegal Boto Lor, Sumbersari, Kec. Sumbersari, Kabupaten Jember, Jawa Timur 68121
+                    </p>
                 </div>
             </div>
 
