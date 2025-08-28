@@ -1,6 +1,6 @@
 <nav class="col-md-2 d-none d-md-block sidebar p-3">
     <h4 class="mb-3"><img src="{{ asset('images/logo.png') }}" width="100"></h4>
-    <h4>LIXIU<in>DIY</in>
+    <h4>LIXIU DIY
     </h4>
     <h4>Admin</h4>
     <ul class="nav flex-column">
