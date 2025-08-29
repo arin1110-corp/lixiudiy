@@ -22,8 +22,15 @@
                 Produk</a>
         </li>
         <li class="nav-item mb-2">
+            <a class="nav-link" href="{{route('admin.pesanan')}}"><i class="bi bi-bag-check"></i> Pesanan</a>
+        </li>
+        <li class="nav-item mb-2">
             <a class="nav-link" href="{{route('admin.pengiriman')}}"><i class="bi bi-truck"></i>
                 Pengiriman</a>
+        </li>
+        <li class="nav-item mb-2">
+            <a class="nav-link" href="{{route('admin.laporan')}}"><i class="bi bi-file-earmark-text"></i> Laporan
+                Penjualan</a>
         </li>
     </ul>
 </nav>

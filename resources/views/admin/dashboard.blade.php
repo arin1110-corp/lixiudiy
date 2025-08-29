@@ -50,7 +50,7 @@
                     <div class="col-md-4">
                         <div class="card text-center">
                             <div class="card-body">
-                                <h5>Total Customer</h5>
+                                <h5>Total Produk</h5>
                                 <p class="display-6 text-success">{{ @$totalproduk }}</p>
                             </div>
                         </div>

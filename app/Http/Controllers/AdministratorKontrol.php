@@ -29,6 +29,7 @@ class AdministratorKontrol extends Controller
         $pesanan = ModelPesanan::count();
         $keranjang = ModelKeranjang::count();
         $datapesanan = ModelPesanan::all();
+        $totaltrx = ModelLaporanPenjualan::sum('laporan_total_pendapatan');
         $datapengiriman = ModelPengiriman::all();
         $datapembayaran = ModelPembayaran::all();
         return view('admin.dashboard', [
@@ -40,24 +41,11 @@ class AdministratorKontrol extends Controller
             'totalPengiriman' => $pengiriman,
             'totalPembayaran' => $pembayaran,
             'totalPesanan' => $pesanan,
+            'totaltrx' => $totaltrx,
             'totalKeranjang' => $keranjang,
         ]);
     }
-    public function login()
-    {
-        return view('loginadmin');
-    }
-    public function loginSubmit(Request $request)
-    {
-        // Logic for admin login submission can be added here
-        return redirect()->route('admin.dashboard');
-    }
 
-    public function logout()
-    {
-        // Logic for admin logout can be added here
-        return redirect()->route('home');
-    }
 
     // Kelola Data Kategori
     public function kategori()
@@ -286,4 +274,14 @@ class AdministratorKontrol extends Controller
         $rekomendasi->delete();
         return redirect()->back()->with('success', 'Data rekomendasi produk berhasil dihapus.');
     }
+
+    //Akhir Kelola Data Rekomendasi Produk
+
+    // Kelola Data Customer
+    public function customer()
+    {
+        $customer = ModelCustomer::all();
+        return view('admin.customer', compact('customer'));
+    }
+    //Akhir Kelola Data Customer
 }
