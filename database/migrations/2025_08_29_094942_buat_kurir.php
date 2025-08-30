@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('kurir_nama', 50);
             $table->string('kurir_notelp', 15);
             $table->string('kurir_alamat', 100);
+            $table->integer('kurir_ongkir');
         });
     }
 

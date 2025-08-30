@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ModelProduk;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
@@ -15,6 +16,7 @@ use App\Models\ModelPengiriman;
 use App\Models\ModelPembayaran;
 use App\Models\ModelPesanan;
 use App\Models\ModelKeranjang;
+use App\Models\ModelKurir;
 use App\Models\ModelLaporanPenjualan;
 use App\Models\ModelRekomendasiProduk;
 use App\Models\ModelAktivasiAkun;
@@ -88,15 +90,177 @@ class HomepageKontrol extends Controller
     }
     public function keranjang()
     {
-        return view('keranjang');
+        $customerId = session('customer_id');
+        if (!$customerId) {
+            return redirect()->route('login')
+                ->with('error', 'Silakan login terlebih dahulu untuk mengakses halaman ini.');
+        }
+        $keranjang = ModelKeranjang::where('keranjang_customer', $customerId)
+            ->where('keranjang_status', 0) // hanya yang belum checkout
+            ->join('lixiudiy_produk', 'lixiudiy_keranjang.keranjang_produk', '=', 'lixiudiy_produk.produk_id')
+            ->join('lixiudiy_kategori', 'lixiudiy_produk.produk_kategori', '=', 'lixiudiy_kategori.kategori_id')
+            ->select('lixiudiy_keranjang.*', 'lixiudiy_produk.produk_nama', 'lixiudiy_kategori.*', 'lixiudiy_produk.produk_harga', 'lixiudiy_produk.produk_gambar')
+            ->get();
+        $rinciantotalharga = ModelKeranjang::where('keranjang_customer', $customerId)
+            ->selectRaw('SUM(keranjang_total_harga) as total_harga, sum(keranjang_jumlah) as total_produk')
+            ->first();
+        $totalHarga = $keranjang->sum('keranjang_total_harga');
+        return view('keranjang', compact('keranjang', 'totalHarga', 'rinciantotalharga'));
+    }
+    public function tambahkeranjang(Request $request)
+    {
+        if (!session('customer_id')) {
+            return redirect()->route('login')
+                ->with('error', 'Silakan login terlebih dahulu untuk menambahkan ke keranjang.');
+        }
+
+        $request->validate([
+            'produk_id' => 'required|exists:lixiudiy_produk,produk_id',
+            'jumlah'    => 'required|integer|min:1',
+        ]);
+
+        $customerId = session('customer_id');
+
+        // Cek apakah produk sudah ada di keranjang
+        $keranjang = ModelKeranjang::where('keranjang_customer', $customerId)
+            ->where('keranjang_produk', $request->produk_id)
+            ->first();
+        $totalHarga = ModelProduk::where('produk_id', $request->produk_id)->value('produk_harga');
+        $totalhargahitung = $totalHarga * $request->jumlah;
+        // Update total harga di keranjang
+
+        if ($keranjang) {
+            // Jika sudah ada, update jumlahnya
+            $keranjang->keranjang_jumlah += $request->jumlah;
+            $keranjang->keranjang_total_harga += $totalhargahitung;
+            $keranjang->save();
+        } else {
+            // Jika belum ada, buat entri baru
+            ModelKeranjang::create([
+                'keranjang_customer' => $customerId,
+                'keranjang_produk'   => $request->produk_id,
+                'keranjang_jumlah'   => $request->jumlah,
+                'keranjang_total_harga' => $totalhargahitung,
+                'keranjang_tanggal'  => Carbon::now()->format('Y-m-d H:i:s'),
+                'keranjang_status'   => 0, // 0=belum checkout, 1=sudah checkout
+            ]);
+        }
+
+        return redirect()->route('keranjang')->with('success', 'Produk berhasil ditambahkan ke keranjang.');
+    }
+    public function updateKeranjang(Request $request, $id)
+    {
+        $request->validate([
+            'jumlah' => 'required|integer|min:1',
+        ]);
+
+        $keranjang = ModelKeranjang::findOrFail($id);
+        if (!$keranjang) {
+            return redirect()->route('keranjang')->with('error', 'Item keranjang tidak ditemukan.');
+        }
+        $produk = ModelProduk::find($keranjang->keranjang_produk);
+
+        // Cek stok
+        if ($request->jumlah > $produk->produk_stok) {
+            return back()->with(
+                'error',
+                'Jumlah Produk ' . $produk->produk_nama . 'melebihi stok yang tersedia. Maksimal ' . $produk->produk_stok
+            );
+        }
+
+        $produkHarga = ModelProduk::where('produk_id', $keranjang->keranjang_produk)->value('produk_harga');
+        $keranjang->keranjang_jumlah = $request->jumlah;
+        $keranjang->keranjang_total_harga = $produkHarga * $request->jumlah;
+        $keranjang->save();
+
+        return redirect()->route('keranjang')->with('success', 'Keranjang berhasil diperbarui.');
+    }
+
+    public function hapusKeranjang($id)
+    {
+        $keranjang = ModelKeranjang::findOrFail($id);
+        if (!$keranjang) {
+            return redirect()->route('keranjang')->with('error', 'Item keranjang tidak ditemukan.');
+        }
+
+        $keranjang->delete();
+
+        return redirect()->route('keranjang')->with('success', 'Item keranjang berhasil dihapus.');
+    }
+    public function checkout()
+    {
+        $customerId = session('customer_id');
+        if (!$customerId) {
+            return redirect()->route('login')
+                ->with('error', 'Silakan login terlebih dahulu untuk checkout.');
+        }
+
+        // Ambil keranjang aktif user
+        $keranjang = ModelKeranjang::where('keranjang_customer', $customerId)
+            ->where('keranjang_status', 0)
+            ->get();
+
+        if ($keranjang->isEmpty()) {
+            // Kalau keranjang kosong, langsung arahkan ke pesanan
+            return redirect()->route('pesanan')
+                ->with('info', 'Keranjang kosong. Silakan cek pesanan Anda.');
+        }
+
+        // Simpan tiap item keranjang jadi pesanan
+        foreach ($keranjang as $item) {
+            ModelPesanan::create([
+                'pesanan_produk'      => $item->keranjang_produk,
+                'pesanan_customer'    => $item->keranjang_customer,
+                'pesanan_keranjang'   => $item->keranjang_id,
+                'pesanan_tanggal'     => now(),
+                'pesanan_jumlah'      => $item->keranjang_jumlah,
+                'pesanan_total_harga' => $item->keranjang_total_harga,
+                'pesanan_status'      => 0,
+            ]);
+
+            // update keranjang jadi status 1
+            $item->update(['keranjang_status' => 1]);
+        }
+
+        return redirect()->route('pesanan')
+            ->with('success', 'Checkout berhasil. Pesanan sudah dibuat.');
     }
     public function pemesanan()
     {
-        return view('pemesanan');
+        $customerId = session('customer_id');
+        if (!$customerId) {
+            return redirect()->route('login')
+                ->with('error', 'Silakan login terlebih dahulu untuk melihat pesanan.');
+        }
+
+        $pesanan = ModelPesanan::where('pesanan_customer', $customerId)
+            ->join('lixiudiy_customer', 'lixiudiy_pesanan.pesanan_customer', '=', 'lixiudiy_customer.customer_id')
+            ->join('lixiudiy_produk', 'lixiudiy_pesanan.pesanan_produk', '=', 'lixiudiy_produk.produk_id')
+            ->where('lixiudiy_pesanan.pesanan_status', '0')
+            ->select('lixiudiy_pesanan.*', 'lixiudiy_produk.*', 'lixiudiy_produk.produk_gambar')
+            ->orderBy('pesanan_tanggal', 'desc')
+            ->get();
+        $datacustomer = ModelCustomer::where('customer_id', $customerId)->first();
+
+
+        return view('pemesanan', compact('pesanan', 'datacustomer'));
     }
     public function konfirmasiPembayaran()
     {
-        return view('pembayaran');
+        $kurir = ModelKurir::all();
+        $pembayaran = ModelPembayaran::all();
+        return view('pembayaran', compact('kurir'));
+    }
+
+    public function akunSaya()
+    {
+        $customerId = session('customer_id');
+        if (!$customerId) {
+            return redirect()->route('login')
+                ->with('error', 'Silakan login terlebih dahulu untuk mengakses halaman ini.');
+        }
+        $customer = ModelCustomer::find($customerId);
+        return view('akuncustomer', compact('customer'));
     }
     public function login()
     {
@@ -154,7 +318,7 @@ class HomepageKontrol extends Controller
             // $link = url('/aktivasi/'.$kode);
             // Mail::to($customer->customer_email)->send(new AktivasiMail($link));
 
-            return redirect()->route('login')
+            return redirect()->route('aktivasi.form')
                 ->with('success', 'Registrasi berhasil. Cek email kamu untuk aktivasi akun.');
         } catch (\Throwable $e) {
             DB::rollBack();
@@ -244,5 +408,12 @@ class HomepageKontrol extends Controller
     {
         // Logic for admin login submission can be added here
         return redirect()->route('admin.dashboard');
+    }
+    protected function redirectTo($request)
+    {
+        if (! $request->expectsJson()) {
+            return redirect()->route('login')
+                ->with('error', 'Silakan login terlebih dahulu untuk mengakses halaman ini.');
+        }
     }
 }

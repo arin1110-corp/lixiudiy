@@ -26,23 +26,18 @@
                         <form>
                             <div class="mb-3">
                                 <label class="form-label">Nama Penerima</label>
-                                <input type="text" class="form-control" placeholder="Nama Lengkap">
+                                <input type="text" class="form-control" value="{{$datacustomer->customer_nama}}"
+                                    readonly>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Alamat Lengkap</label>
-                                <textarea class="form-control" rows="3" placeholder="Alamat lengkap"></textarea>
+                                <textarea class="form-control" rows="3"
+                                    readonly>{{$datacustomer->customer_alamat}}</textarea>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Nomor Telepon</label>
-                                <input type="text" class="form-control" placeholder="08xxxxxxxxxx">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Metode Pengiriman</label>
-                                <select class="form-select">
-                                    <option>JNE</option>
-                                    <option>SiCepat</option>
-                                    <option>POS Indonesia</option>
-                                </select>
+                                <input type="text" class="form-control" value="{{$datacustomer->customer_telepon}}"
+                                    readonly>
                             </div>
                         </form>
                     </div>
@@ -62,18 +57,26 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                @php
+                                $subtotal = $pesanan->sum('pesanan_total_harga');
+                                @endphp
+                                @foreach ($pesanan as $k)
                                 <tr>
-                                    <td>Produk A</td>
-                                    <td>2</td>
-                                    <td>Rp 50.000</td>
-                                    <td>Rp 100.000</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="{{ $k->produk_gambar }}" class="me-3 rounded"
+                                                alt="{{ $k->produk_nama }}" width="60" height="60">
+                                            <div>
+                                                <h6 class="mb-0">{{ $k->produk_nama }}</h6>
+                                                <small class="text-muted">{{$k->kategori_nama }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ $k->pesanan_jumlah }}</td>
+                                    <td>Rp {{ number_format($k->produk_harga, 0, ',', '.') }}</td>
+                                    <td>Rp {{ number_format($k->pesanan_total_harga, 0, ',', '.') }}</td>
                                 </tr>
-                                <tr>
-                                    <td>Produk B</td>
-                                    <td>1</td>
-                                    <td>Rp 75.000</td>
-                                    <td>Rp 75.000</td>
-                                </tr>
+                                @endforeach
                             </tbody>
                         </table>
                     </div>
@@ -87,19 +90,20 @@
                         <h5 class="card-title">Ringkasan Belanja</h5>
                         <div class="d-flex justify-content-between mb-2">
                             <span>Subtotal:</span>
-                            <strong>Rp 175.000</strong>
+                            <strong>Rp <span id="subtotal">{{ number_format($subtotal, 0, ',', '.') }}</span></strong>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span>Ongkir:</span>
-                            <strong>Rp 20.000</strong>
+                            <strong>Rp <span id="ongkir">0</span></strong>
                         </div>
                         <hr>
                         <div class="d-flex justify-content-between mb-3">
                             <span>Total:</span>
-                            <strong>Rp 195.000</strong>
+                            <strong>Rp <span id="total">{{ number_format($subtotal, 0, ',', '.') }}</span></strong>
                         </div>
                         <button class="btn btn-success w-100">Bayar Sekarang</button>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -108,6 +112,35 @@
     @include('partials.footer')
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // pastikan angka mentah (tanpa pemisah ribuan) masuk ke JS
+            const subtotal = Number("{{ (float) $subtotal }}");
+            console.log(subtotal);
+            const kurirSelect = document.getElementById("kurir");
+            const ongkirEl = document.getElementById("ongkir");
+            const totalEl = document.getElementById("total");
+
+            const rupiah = (n) => n.toLocaleString("id-ID");
+
+            function updateTotal() {
+                const opt = kurirSelect?.options[kurirSelect.selectedIndex];
+                const ongkir = Number(opt?.dataset.ongkir ?? 0);
+                const total = subtotal + ongkir;
+
+                ongkirEl.textContent = rupiah(ongkir);
+                totalEl.textContent = rupiah(total);
+            }
+
+            if (kurirSelect) {
+                // hitung saat halaman pertama kali load
+                updateTotal();
+                // hitung ulang saat kurir diganti
+                kurirSelect.addEventListener("change", updateTotal);
+            }
+        });
+    </script>
+
 </body>
 
 </html>

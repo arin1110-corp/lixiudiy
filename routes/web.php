@@ -26,9 +26,14 @@ Route::post('/aktivasi-akun-submit', [HomepageKontrol::class, 'aktivasiAkunSubmi
 
 //customer
 Route::get('/keranjang', [HomepageKontrol::class, 'keranjang'])->name('keranjang');
-Route::post('/tambah-keranjang', [HomepageKontrol::class, 'keranjang'])->name('keranjang');
+Route::post('/tambah-keranjang', [HomepageKontrol::class, 'tambahkeranjang'])->name('tambah.keranjang');
+Route::put('/update/keranjang/{id}', [HomepageKontrol::class, 'updateKeranjang'])->name('update.keranjang');
+Route::delete('/hapus/keranjang/{id}', [HomepageKontrol::class, 'hapusKeranjang'])->name('hapus.keranjang');
+Route::get('/akun-saya', [HomepageKontrol::class, 'akunSaya'])->name('akun.customer');
+Route::post('/akun-saya-update', [HomepageKontrol::class, 'akunSayaUpdate'])->name('akun.customer.update')->middleware('auth');
 
-Route::get('/pemesanan', [HomepageKontrol::class, 'pemesanan'])->name('pemesanan');
+Route::get('/pemesanan', [HomepageKontrol::class, 'pemesanan'])->name('pesanan');
+Route::get('/pemesanan-submit', [HomepageKontrol::class, 'checkout'])->name('pesanan.submit');
 Route::get('/konfirmasi-pembayaran', [HomepageKontrol::class, 'konfirmasiPembayaran'])->name('konfirmasipembayaran');
 
 

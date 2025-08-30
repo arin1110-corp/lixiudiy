@@ -9,37 +9,37 @@
     <link rel="stylesheet" href="{{ asset('css/home.css') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-    body {
-        background-color: #f8f9fa;
-    }
+        body {
+            background-color: #f8f9fa;
+        }
 
-    .card {
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    }
+        .card {
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
 
-    .card-header {
-        background: #ffffff;
-        font-weight: bold;
-        font-size: 1.1rem;
-        border-bottom: 1px solid #eee;
-    }
+        .card-header {
+            background: #ffffff;
+            font-weight: bold;
+            font-size: 1.1rem;
+            border-bottom: 1px solid #eee;
+        }
 
-    h3 {
-        font-weight: 700;
-    }
+        h3 {
+            font-weight: 700;
+        }
 
-    .btn-success {
-        border-radius: 10px;
-        padding: 12px 30px;
-        font-size: 1.1rem;
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-        transition: 0.3s;
-    }
+        .btn-success {
+            border-radius: 10px;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+            transition: 0.3s;
+        }
 
-    .btn-success:hover {
-        transform: translateY(-2px);
-    }
+        .btn-success:hover {
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 
@@ -78,17 +78,37 @@
         <div class="card mb-4">
             <div class="card-header">🚚 Pilih Pengiriman</div>
             <div class="card-body">
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="radio" name="shipping" id="jne" checked>
-                    <label class="form-check-label" for="jne">JNE - Rp 20.000 (2-3 Hari)</label>
+                <div class="mb-3">
+                    <label class="form-label">Metode Pengiriman</label>
+                    <select class="form-select" id="kurir" name="kurir">
+                        @foreach ($kurir as $k)
+                        <option value="{{ $k->kurir_id }}" data-ongkir="{{ $k->kurir_ongkir }}">
+                            {{ $k->kurir_nama }} - Rp {{ number_format($k->kurir_ongkir, 0, ',', '.') }}
+                        </option>
+                        @endforeach
+                    </select>
                 </div>
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="radio" name="shipping" id="jnt">
-                    <label class="form-check-label" for="jnt">J&T - Rp 18.000 (2-4 Hari)</label>
+            </div>
+        </div>
+
+        <!-- Pilih Pengiriman -->
+        <div class="card mb-4">
+            <div class="card-header">Total</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="col text-end">
+                        <strong class="fs-7">Total Produk: Rp 200.000</strong>
+                    </div>
                 </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="shipping" id="sicepat">
-                    <label class="form-check-label" for="sicepat">SiCepat - Rp 22.000 (1-2 Hari)</label>
+                <div class="mb-3">
+                    <div class="col text-end">
+                        <strong class="fs-7">Ongkir: Rp 200.000</strong>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="col text-end">
+                        <strong class="fs-5">Total Bayar : Rp 200.000</strong>
+                    </div>
                 </div>
             </div>
         </div>

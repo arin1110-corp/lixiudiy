@@ -17,7 +17,7 @@ return new class extends Migration
             $table->bigInteger('pesanan_produk');
             $table->bigInteger('pesanan_customer');
             $table->bigInteger('pesanan_keranjang');
-            $table->datetime('pesanan_tanggal');
+            $table->date('pesanan_tanggal');
             $table->integer('pesanan_jumlah');
             $table->decimal('pesanan_total_harga', 10, 2);
             $table->string('pesanan_status')->default('pending'); // Default status is 'pending'

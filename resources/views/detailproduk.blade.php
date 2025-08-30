@@ -86,11 +86,16 @@
                         <p class="mb-4">
                             {{ $produk->produk_deskripsi }}
                         </p>
+                        <p class="mb-4">
+                            Stok tersedia: <span class="fw-semibold">{{ $produk->produk_stok }}</span>
+                        </p>
 
-                        <form action="tambah-keranjang" method="POST">
+                        <form action="{{route('tambah.keranjang')}}" method="POST">
+                            @csrf
                             <div class="d-flex align-items-center mb-3">
                                 <label class="me-2 fw-semibold">Jumlah:</label>
-                                <input type="number" value="1" min="1" class="form-control w-25">
+                                <input type="number" value="1" min="1" name="jumlah" class="form-control w-25">
+                                <input type="hidden" name="produk_id" value="{{ $produk->produk_id }}">
                             </div>
                             <button type="submit" class="btn btn-primary me-2">Tambah ke Keranjang</button>
                             <a href="/produk" class="btn btn-outline-secondary">Kembali</a>

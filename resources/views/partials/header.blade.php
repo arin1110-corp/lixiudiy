@@ -6,8 +6,8 @@
     </a>
     @include('partials.menu')
     <div class="icons">
-        <a href="#"><i class="fas fa-shopping-cart"></i></a>
-        <a href="#"><i class="fas fa-user"></i></a>
+        <a href="{{route('keranjang')}}"><i class="fas fa-shopping-cart"></i></a>
+        <a href="{{route('akun.customer')}}"><i class="fas fa-user"></i></a>
     </div>
     <div class="menu-toggle" id="menu-toggle">
         <i class="fas fa-bars"></i>
