@@ -284,4 +284,10 @@ class AdministratorKontrol extends Controller
         return view('admin.customer', compact('customer'));
     }
     //Akhir Kelola Data Customer
+
+    // Kelola Data Pesanan
+    public function pesanan()
+    {
+        $pesanan = ModelPesanan::all();
+    }
 }

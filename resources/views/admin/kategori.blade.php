@@ -40,7 +40,7 @@
                 {{-- Tabel Data Bidang --}}
                 <div class="card">
                     <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
-                        <span>Data Bidang</span>
+                        <span>Data Kategori</span>
                         <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalTambah">
                             <i class="bi bi-plus-lg"></i> Tambah Data
                         </button>

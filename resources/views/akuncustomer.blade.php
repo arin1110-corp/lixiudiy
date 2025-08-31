@@ -10,14 +10,14 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-    .list-group-item.active {
-        background-color: #198754;
-        border-color: #198754;
-    }
+        .list-group-item.active {
+            background-color: #198754;
+            border-color: #198754;
+        }
 
-    .card {
-        min-height: 350px;
-    }
+        .card {
+            min-height: 350px;
+        }
     </style>
 </head>
 
@@ -30,20 +30,15 @@
             <!-- Sidebar -->
             <div class="col-md-3 mb-4">
                 <div class="list-group shadow-sm">
-                    <a href="#profil" class="list-group-item list-group-item-action active" data-bs-toggle="tab">
-                        <i class="fa fa-user me-2"></i> Profil Saya
-                    </a>
-                    <a href="#pesanan" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+
+                    <a href="#pesanan" class="list-group-item list-group-item-action active" data-bs-toggle="tab">
                         <i class="fa fa-box me-2"></i> Pesanan Saya
                     </a>
-                    <a href="#alamat" class="list-group-item list-group-item-action" data-bs-toggle="tab">
-                        <i class="fa fa-map-marker-alt me-2"></i> Alamat Pengiriman
+                    <a href="#profil" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                        <i class="fa fa-user me-2"></i> Profil Saya
                     </a>
-                    <a href="#kartu" class="list-group-item list-group-item-action" data-bs-toggle="tab">
-                        <i class="fa fa-credit-card me-2"></i> Kartu Pembayaran
-                    </a>
-                    <a href="#riwayat" class="list-group-item list-group-item-action" data-bs-toggle="tab">
-                        <i class="fa fa-history me-2"></i> Riwayat Pesanan
+                    <a href="#pengiriman" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                        <i class="fa fa-map-marker-alt me-2"></i> Pengiriman
                     </a>
                     <a href="#" class="list-group-item list-group-item-action text-danger">
                         <i class="fa fa-sign-out-alt me-2"></i> Logout
@@ -55,81 +50,119 @@
             <div class="col-md-9">
                 <div class="tab-content">
 
+
+                    {{-- PESANAN --}}
+                    <div class="tab-pane fade show active" id="pesanan">
+                        <div class="card shadow-sm p-4 rounded-4">
+                            <h4 class="mb-4">Pesanan Saya</h4>
+
+                            @if(session('success'))
+                            <div class="alert alert-success">{{ session('success') }}</div>
+                            @endif
+
+                            @if($pesanan->isEmpty())
+                            <p>Belum ada pesanan.</p>
+                            @else
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Kode Pesanan</th>
+                                        <th>Tanggal</th>
+                                        <th>Metode Pembayaran</th>
+                                        <th>Metode Pengiriman</th>
+                                        <th>Status</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($pesanan as $pembayaranId => $group)
+                                    @php
+                                    $pay = $group['pembayaran'];
+                                    $items = $group['items'];
+                                    $totalBayar = $items->sum(fn($i) => $i->pesanan_jumlah * $i->produk_harga);
+                                    $collapseId = 'detail-' . $pembayaranId;
+                                    @endphp
+
+                                    <tr data-bs-toggle="collapse" data-bs-target="#{{ $collapseId }}"
+                                        style="cursor:pointer;">
+                                        <td>#ORD{{ $pembayaranId }}</td>
+                                        <td>{{ $pay->pembayaran_tanggal }}</td>
+                                        <td>{{ $pay->pembayaran_metode == '1' ? 'Transfer Bank' : ($pay->pembayaran_metode == '2' ? 'QRIS/E-Wallet' : 'COD') }}
+                                        </td>
+                                        <td>{{ $kurir->kurir_nama }}</td>
+                                        <td>
+                                            @if($pay->pembayaran_status == '0')
+                                            <span class="badge bg-warning">Menunggu Konfirmasi</span>
+                                            @elseif($pay->pembayaran_status == '1')
+                                            <span class="badge bg-info">Dikonfirmasi</span>
+                                            @endif
+                                        </td>
+                                        <td>Rp {{ number_format($totalBayar, 0, ',', '.') }}</td>
+                                    </tr>
+
+                                    <tr class="collapse bg-light" id="{{ $collapseId }}">
+                                        <td colspan="4">
+                                            <strong>Produk Dibeli:</strong>
+                                            <ul class="mb-0">
+                                                @foreach($items as $it)
+                                                <li class="mb-2 d-flex align-items-center">
+                                                    <img src="{{ $it->produk_gambar }}" width="60" class="me-2 rounded">
+                                                    {{ $it->produk_nama }}
+                                                    ({{ $it->pesanan_jumlah }} x Rp
+                                                    {{ number_format($it->produk_harga,0,',','.') }})
+                                                    = <strong>Rp
+                                                        {{ number_format($it->pesanan_jumlah * $it->produk_harga,0,',','.') }}</strong>
+                                                </li>
+                                                @endforeach
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                            @endif
+                        </div>
+                    </div>
                     {{-- PROFIL --}}
-                    <div class="tab-pane fade show active" id="profil">
+                    <div class="tab-pane fade show" id="profil">
                         <div class="card shadow-sm p-4 rounded-4">
                             <h4 class="mb-4">Profil Saya</h4>
-                            <form method="POST" action="#">
+                            <form method="POST" action="{{ route('update.customer', $customer->customer_id) }}">
                                 @csrf
+                                @method('PUT')
                                 <div class="mb-3">
                                     <label class="form-label fw-bold">Nama Lengkap</label>
-                                    <input type="text" class="form-control"
-                                        value="{{ old('name', Auth::user()->name ?? '') }}">
+                                    <input type="text" class="form-control" name="customer_nama"
+                                        value="{{$customer->customer_nama}}">
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label fw-bold">Email</label>
-                                    <input type="email" class="form-control"
-                                        value="{{ old('email', Auth::user()->email ?? '') }}">
+                                    <input type="email" class="form-control" name="customer_email"
+                                        value="{{ $customer->customer_email }}">
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label fw-bold">Nomor Telepon</label>
-                                    <input type="text" class="form-control"
-                                        value="{{ old('phone', Auth::user()->phone ?? '') }}">
+                                    <input type="text" class="form-control" name="customer_telepon"
+                                        value="{{ $customer->customer_telepon }}">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Alamat</label>
+                                    <textarea class="form-control" name="customer_alamat"
+                                        rows="3">{{ $customer->customer_alamat }}</textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Tanggal Lahir</label>
+                                    <input type="date" class="form-control" name="customer_tanggallahir"
+                                        value="{{ $customer->customer_tanggallahir }}">
                                 </div>
                                 <button type="submit" class="btn btn-success w-100">Simpan Perubahan</button>
                             </form>
                         </div>
                     </div>
 
-                    {{-- PESANAN --}}
-                    <div class="tab-pane fade" id="pesanan">
-                        <div class="card shadow-sm p-4 rounded-4">
-                            <h4 class="mb-4">Pesanan Saya</h4>
-                            <p>Daftar pesanan aktif Anda akan muncul di sini.</p>
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th>Kode Pesanan</th>
-                                        <th>Tanggal</th>
-                                        <th>Status</th>
-                                        <th>Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>#ORD123</td>
-                                        <td>15-08-2025</td>
-                                        <td><span class="badge bg-warning">Menunggu</span></td>
-                                        <td>Rp 250.000</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
 
-                    {{-- ALAMAT --}}
-                    <div class="tab-pane fade" id="alamat">
-                        <div class="card shadow-sm p-4 rounded-4">
-                            <h4 class="mb-4">Alamat Pengiriman</h4>
-                            <div class="mb-3">
-                                <p><strong>Alamat Utama:</strong><br>
-                                    Jl. Contoh No.123, Jakarta</p>
-                                <button class="btn btn-outline-primary btn-sm">Ubah Alamat</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- KARTU --}}
-                    <div class="tab-pane fade" id="kartu">
-                        <div class="card shadow-sm p-4 rounded-4">
-                            <h4 class="mb-4">Kartu Pembayaran</h4>
-                            <p>Tambahkan atau kelola metode pembayaran Anda.</p>
-                            <button class="btn btn-success"><i class="fa fa-plus me-2"></i> Tambah Kartu</button>
-                        </div>
-                    </div>
-
-                    {{-- RIWAYAT --}}
-                    <div class="tab-pane fade" id="riwayat">
+                    {{-- PENGIRIMAN --}}
+                    <div class="tab-pane fade" id="pengiriman">
                         <div class="card shadow-sm p-4 rounded-4">
                             <h4 class="mb-4">Riwayat Pesanan</h4>
                             <ul>

@@ -88,20 +88,14 @@
                 <div class="card shadow-sm">
                     <div class="card-body">
                         <h5 class="card-title">Ringkasan Belanja</h5>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Subtotal:</span>
-                            <strong>Rp <span id="subtotal">{{ number_format($subtotal, 0, ',', '.') }}</span></strong>
-                        </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Ongkir:</span>
-                            <strong>Rp <span id="ongkir">0</span></strong>
-                        </div>
+
                         <hr>
                         <div class="d-flex justify-content-between mb-3">
                             <span>Total:</span>
                             <strong>Rp <span id="total">{{ number_format($subtotal, 0, ',', '.') }}</span></strong>
                         </div>
-                        <button class="btn btn-success w-100">Bayar Sekarang</button>
+                        <a href="{{route('pembayaran.form')}}"><button class="btn btn-success w-100">Bayar
+                                Sekarang</button>
                     </div>
 
                 </div>
@@ -112,34 +106,7 @@
     @include('partials.footer')
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // pastikan angka mentah (tanpa pemisah ribuan) masuk ke JS
-            const subtotal = Number("{{ (float) $subtotal }}");
-            console.log(subtotal);
-            const kurirSelect = document.getElementById("kurir");
-            const ongkirEl = document.getElementById("ongkir");
-            const totalEl = document.getElementById("total");
 
-            const rupiah = (n) => n.toLocaleString("id-ID");
-
-            function updateTotal() {
-                const opt = kurirSelect?.options[kurirSelect.selectedIndex];
-                const ongkir = Number(opt?.dataset.ongkir ?? 0);
-                const total = subtotal + ongkir;
-
-                ongkirEl.textContent = rupiah(ongkir);
-                totalEl.textContent = rupiah(total);
-            }
-
-            if (kurirSelect) {
-                // hitung saat halaman pertama kali load
-                updateTotal();
-                // hitung ulang saat kurir diganti
-                kurirSelect.addEventListener("change", updateTotal);
-            }
-        });
-    </script>
 
 </body>
 

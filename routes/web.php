@@ -22,6 +22,7 @@ Route::post('/register-submit', [HomepageKontrol::class, 'registerSubmit'])->nam
 Route::get('/logout', [HomepageKontrol::class, 'logout'])->name('logout');
 Route::get('/aktivasi-akun', [HomepageKontrol::class, 'aktivasiForm'])->name('aktivasi.form');
 Route::post('/aktivasi-akun-submit', [HomepageKontrol::class, 'aktivasiAkunSubmit'])->name('customer.aktivasi');
+Route::put('/update/customer/{id}', [HomepageKontrol::class, 'updateCustomer'])->name('update.customer');
 
 
 //customer
@@ -34,7 +35,8 @@ Route::post('/akun-saya-update', [HomepageKontrol::class, 'akunSayaUpdate'])->na
 
 Route::get('/pemesanan', [HomepageKontrol::class, 'pemesanan'])->name('pesanan');
 Route::get('/pemesanan-submit', [HomepageKontrol::class, 'checkout'])->name('pesanan.submit');
-Route::get('/konfirmasi-pembayaran', [HomepageKontrol::class, 'konfirmasiPembayaran'])->name('konfirmasipembayaran');
+Route::get('/lanjut/bayar', [HomepageKontrol::class, 'pembayaran'])->name('pembayaran.form');
+Route::post('/konfirmasi-pembayaran', [HomepageKontrol::class, 'konfirmasiPembayaran'])->name('konfirmasi.pembayaran');
 
 
 

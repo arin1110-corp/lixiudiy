@@ -20,6 +20,7 @@ use App\Models\ModelKurir;
 use App\Models\ModelLaporanPenjualan;
 use App\Models\ModelRekomendasiProduk;
 use App\Models\ModelAktivasiAkun;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 
 class HomepageKontrol extends Controller
@@ -245,22 +246,114 @@ class HomepageKontrol extends Controller
 
         return view('pemesanan', compact('pesanan', 'datacustomer'));
     }
-    public function konfirmasiPembayaran()
+    public function pembayaran()
     {
+        $customerId = session('customer_id');
+        if (!$customerId) {
+            return redirect()->route('login')
+                ->with('error', 'Silakan login terlebih dahulu untuk melihat pesanan.');
+        }
+
         $kurir = ModelKurir::all();
-        $pembayaran = ModelPembayaran::all();
-        return view('pembayaran', compact('kurir'));
+        $pesanan = ModelPesanan::where('pesanan_customer', $customerId)
+            ->join('lixiudiy_customer', 'lixiudiy_pesanan.pesanan_customer', '=', 'lixiudiy_customer.customer_id')
+            ->join('lixiudiy_produk', 'lixiudiy_pesanan.pesanan_produk', '=', 'lixiudiy_produk.produk_id')
+            ->where('lixiudiy_pesanan.pesanan_status', '0')
+            ->select('lixiudiy_pesanan.*', 'lixiudiy_produk.*', 'lixiudiy_produk.produk_gambar')
+            ->orderBy('pesanan_tanggal', 'desc')
+            ->get();
+
+        return view('pembayaran', compact('kurir', 'pesanan'));
+    }
+    public function konfirmasiPembayaran(Request $request)
+    {
+        $request->validate([
+            'pesanan_id' => 'required',
+            'pembayaran_jumlah' => 'required|numeric',
+            'pembayaran_metode' => 'required|string',
+            'kurir' => 'required'
+        ]);
+
+        ModelPembayaran::create([
+            'pembayaran_pesanan' => $request->pesanan_id,
+            'pembayaran_jumlah' => $request->pembayaran_jumlah,
+            'pembayaran_tanggal' => now(),
+            'pembayaran_metode' => $request->pembayaran_metode,
+            'pembayaran_status' => '0',
+            'pembayaran_keterangan' => $request->kurir
+        ]);
+
+        $pesananid = explode(';', $request->pesanan_id);
+        // update status pesanan jadi "dibayar"
+        ModelPesanan::whereIn('pesanan_id', $pesananid)
+            ->update(['pesanan_status' => '1']);
+
+        return redirect()->route('akun.customer')->with('success', 'Pembayaran berhasil dicatat!');
     }
 
-    public function akunSaya()
+    public function akunSaya(Request $request)
     {
         $customerId = session('customer_id');
         if (!$customerId) {
             return redirect()->route('login')
                 ->with('error', 'Silakan login terlebih dahulu untuk mengakses halaman ini.');
         }
+
         $customer = ModelCustomer::find($customerId);
-        return view('akuncustomer', compact('customer'));
+
+        $pembayaran = ModelPembayaran::whereIn('pembayaran_id', function ($q) use ($customerId) {
+            $q->select('pembayaran_id')
+                ->from('lixiudiy_pembayaran')
+                ->join('lixiudiy_kurir', 'lixiudiy_pembayaran.pembayaran_keterangan', '=', 'lixiudiy_kurir.kurir_id')
+                ->join('lixiudiy_pesanan', 'lixiudiy_pesanan.pesanan_id', '=', DB::raw("SUBSTRING_INDEX(lixiudiy_pembayaran.pembayaran_pesanan, ';', 1)")) // trik ambil id pertama
+                ->where('pesanan_customer', $customerId);
+        })->get();
+
+        $pesanan = collect();
+        $kurir = ModelKurir::join('lixiudiy_pembayaran', 'lixiudiy_kurir.kurir_id', '=', 'lixiudiy_pembayaran.pembayaran_keterangan')
+            ->join('lixiudiy_pesanan', 'lixiudiy_pesanan.pesanan_id', '=', DB::raw("SUBSTRING_INDEX(lixiudiy_pembayaran.pembayaran_pesanan, ';', 1)")) // trik ambil id pertama
+            ->where('pesanan_customer', $customerId)
+            ->first();
+
+        foreach ($pembayaran as $pay) {
+            // Pecah semua pesanan_id dalam string "1;2;3"
+            $ids = explode(';', $pay->pembayaran_pesanan);
+
+            $items = DB::table('lixiudiy_pesanan')
+                ->join('lixiudiy_produk', 'lixiudiy_pesanan.pesanan_produk', '=', 'lixiudiy_produk.produk_id')
+                ->whereIn('lixiudiy_pesanan.pesanan_id', $ids)
+                ->select('lixiudiy_pesanan.*', 'lixiudiy_produk.*')
+                ->get();
+
+            $pesanan[$pay->pembayaran_id] = [
+                'pembayaran' => $pay,
+                'items'      => $items,
+            ];
+        }
+
+        $tab = $request->query('tab', 'profil');
+
+        return view('akuncustomer', compact('customer', 'pesanan', 'tab', 'kurir'));
+    }
+    public function updateCustomer(Request $request)
+    {
+        $request->validate([
+            'customer_nama'         => 'required|string|max:150',
+            'customer_email'        => 'required|email:rfc,dns',
+            'customer_telepon'      => 'required|string|max:30',
+            'customer_alamat'       => 'required|string|max:255',
+            'customer_tanggallahir' => 'required|date', // format Y-m-d dari <input type="date">
+        ]);
+
+        $customer = ModelCustomer::find(session('customer_id'));
+        $customer->customer_nama = $request->customer_nama;
+        $customer->customer_email = $request->customer_email;
+        $customer->customer_telepon = $request->customer_telepon;
+        $customer->customer_alamat = $request->customer_alamat;
+        $customer->customer_tanggallahir = $request->customer_tanggallahir;
+        $customer->save();
+
+        return redirect()->route('akun.customer')->with('success', 'Profil berhasil diubah!');
     }
     public function login()
     {

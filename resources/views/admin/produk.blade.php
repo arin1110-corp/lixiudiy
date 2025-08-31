@@ -108,7 +108,7 @@
                 @csrf
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="modalTambahLabel">Tambah Data Kategori</h5>
+                        <h5 class="modal-title" id="modalTambahLabel">Tambah Data Produk</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
@@ -259,61 +259,61 @@
     <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 
     <script>
-    $(document).ready(function() {
-        // Init DataTable
-        $('#tabelBidang').DataTable({
-            responsive: true,
-            language: {
-                url: "//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json"
-            }
+        $(document).ready(function() {
+            // Init DataTable
+            $('#tabelBidang').DataTable({
+                responsive: true,
+                language: {
+                    url: "//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json"
+                }
+            });
+
+            // Edit Button
+            $('.btnEdit').click(function() {
+                let id = $(this).data('id');
+                let nama = $(this).data('nama');
+                let deskripsi = $(this).data('deskripsi');
+                let harga = $(this).data('harga');
+                let stok = $(this).data('stok');
+                let tanggalmasuk = $(this).data('tanggalmasuk'); // format sudah Y-m-d
+                let status = $(this).data('status');
+                let kategori = $(this).data('kategori');
+                let gambar = $(this).data('gambar');
+
+                $('#formEdit').attr('action', '/admin/produk/update/' + id);
+                $('#edit_nama').val(nama);
+                $('#edit_deskripsi').val(deskripsi);
+                $('#edit_harga').val(Math.round(harga)); // pastikan bulat
+                $('#edit_stok').val(stok);
+
+                // langsung set ke input date
+                $('#edit_tanggalmasuk').val(tanggalmasuk);
+
+                $('#edit_status').val(status);
+                $('#edit_kategori').val(kategori);
+
+                // Preview gambar
+                if (gambar) {
+                    $('#previewGambar').attr('src', gambar.startsWith('/') ? gambar : '/' + gambar);
+                } else {
+                    $('#previewGambar').attr('src', '/images/no-image.png');
+                }
+
+                $('#modalEdit').modal('show');
+            });
+
+            // Hapus Button
+            $('.btnHapus').click(function() {
+                let id = $(this).data('id');
+                let nama = $(this).data('nama');
+
+                $('#formHapus').attr('action', '/admin/produk/delete/' + id);
+                $('#hapus_nama').text(nama);
+
+                let modalHapus = new bootstrap.Modal(document.getElementById('modalHapus'));
+                modalHapus.show();
+            });
         });
-
-        // Edit Button
-        $('.btnEdit').click(function() {
-            let id = $(this).data('id');
-            let nama = $(this).data('nama');
-            let deskripsi = $(this).data('deskripsi');
-            let harga = $(this).data('harga');
-            let stok = $(this).data('stok');
-            let tanggalmasuk = $(this).data('tanggalmasuk'); // format sudah Y-m-d
-            let status = $(this).data('status');
-            let kategori = $(this).data('kategori');
-            let gambar = $(this).data('gambar');
-
-            $('#formEdit').attr('action', '/admin/produk/update/' + id);
-            $('#edit_nama').val(nama);
-            $('#edit_deskripsi').val(deskripsi);
-            $('#edit_harga').val(Math.round(harga)); // pastikan bulat
-            $('#edit_stok').val(stok);
-
-            // langsung set ke input date
-            $('#edit_tanggalmasuk').val(tanggalmasuk);
-
-            $('#edit_status').val(status);
-            $('#edit_kategori').val(kategori);
-
-            // Preview gambar
-            if (gambar) {
-                $('#previewGambar').attr('src', gambar.startsWith('/') ? gambar : '/' + gambar);
-            } else {
-                $('#previewGambar').attr('src', '/images/no-image.png');
-            }
-
-            $('#modalEdit').modal('show');
-        });
-
-        // Hapus Button
-        $('.btnHapus').click(function() {
-            let id = $(this).data('id');
-            let nama = $(this).data('nama');
-
-            $('#formHapus').attr('action', '/admin/produk/delete/' + id);
-            $('#hapus_nama').text(nama);
-
-            let modalHapus = new bootstrap.Modal(document.getElementById('modalHapus'));
-            modalHapus.show();
-        });
-    });
     </script>
 
 </body>
