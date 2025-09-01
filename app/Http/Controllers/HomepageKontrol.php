@@ -22,6 +22,7 @@ use App\Models\ModelRekomendasiProduk;
 use App\Models\ModelAktivasiAkun;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use App\Mail\AktivasiMail;
 
 class HomepageKontrol extends Controller
 {
@@ -259,7 +260,7 @@ class HomepageKontrol extends Controller
             ->join('lixiudiy_customer', 'lixiudiy_pesanan.pesanan_customer', '=', 'lixiudiy_customer.customer_id')
             ->join('lixiudiy_produk', 'lixiudiy_pesanan.pesanan_produk', '=', 'lixiudiy_produk.produk_id')
             ->where('lixiudiy_pesanan.pesanan_status', '0')
-            ->select('lixiudiy_pesanan.*', 'lixiudiy_produk.*', 'lixiudiy_produk.produk_gambar')
+            ->select('lixiudiy_pesanan.*', 'lixiudiy_produk.*', 'lixiudiy_produk.produk_gambar', 'lixiudiy_customer.*')
             ->orderBy('pesanan_tanggal', 'desc')
             ->get();
 
@@ -271,10 +272,13 @@ class HomepageKontrol extends Controller
             'pesanan_id' => 'required',
             'pembayaran_jumlah' => 'required|numeric',
             'pembayaran_metode' => 'required|string',
-            'kurir' => 'required'
+            'kurir' => 'required',
+            'alamat' => 'required',
+            'bukti' => 'required_if:pembayaran_metode,1|file|mimes:jpg,jpeg|max:2048',
         ]);
 
-        ModelPembayaran::create([
+
+        $pembayaran = ModelPembayaran::create([
             'pembayaran_pesanan' => $request->pesanan_id,
             'pembayaran_jumlah' => $request->pembayaran_jumlah,
             'pembayaran_tanggal' => now(),
@@ -282,11 +286,26 @@ class HomepageKontrol extends Controller
             'pembayaran_status' => '0',
             'pembayaran_keterangan' => $request->kurir
         ]);
+        ModelPengiriman::create([
+            'pengiriman_pesanan' => $request->pesanan_id,
+            'pengiriman_jasakurir' => $request->kurir,
+            'pengiriman_alamat' => $request->alamat,
+            'pengiriman_nomor_resi' => '-',
+            'pengiriman_status' => '0',
+            'pengiriman_tanggal' => now(),
+            'pengiriman_keterangan' => '-'
+        ]);
 
         $pesananid = explode(';', $request->pesanan_id);
         // update status pesanan jadi "dibayar"
         ModelPesanan::whereIn('pesanan_id', $pesananid)
             ->update(['pesanan_status' => '1']);
+
+        // Simpan file bukti
+        if ($request->hasFile('bukti') && $request->file('bukti')->isValid()) {
+            $filename = 'BYR' . $pembayaran->pembayaran_id . '.jpg';
+            $request->file('bukti')->move(public_path('bukti'), $filename);
+        }
 
         return redirect()->route('akun.customer')->with('success', 'Pembayaran berhasil dicatat!');
     }
@@ -316,6 +335,27 @@ class HomepageKontrol extends Controller
             ->first();
 
         foreach ($pembayaran as $pay) {
+            $ids = explode(';', $pay->pembayaran_pesanan);
+
+            $items = DB::table('lixiudiy_pesanan')
+                ->join('lixiudiy_produk', 'lixiudiy_pesanan.pesanan_produk', '=', 'lixiudiy_produk.produk_id')
+                ->whereIn('lixiudiy_pesanan.pesanan_id', $ids)
+                ->select('lixiudiy_pesanan.*', 'lixiudiy_produk.*')
+                ->get();
+
+            // ambil data pengiriman berdasarkan pesanan yang sama
+            $pengiriman = ModelPengiriman::whereIn('pengiriman_pesanan', $ids)->first();
+
+            $pengirimanindex[$pay->pembayaran_id] = [
+                'pembayaran' => $pay,
+                'items'      => $items,
+                'alamat'     => $pengiriman ? $pengiriman->pengiriman_alamat : '-',
+                'kurir'      => $pengiriman ? $pengiriman->pengiriman_jasakurir : null,
+                'nomor'      => $pengiriman ? $pengiriman->pengiriman_nomor_resi : '-',
+            ];
+        }
+
+        foreach ($pembayaran as $pay) {
             // Pecah semua pesanan_id dalam string "1;2;3"
             $ids = explode(';', $pay->pembayaran_pesanan);
 
@@ -332,8 +372,12 @@ class HomepageKontrol extends Controller
         }
 
         $tab = $request->query('tab', 'profil');
+        $pengiriman = $pengiriman ?? collect();
+        $kurir      = $kurir ?? collect();
+        $pesanan    = $pesanan ?? collect();
+        $pengirimanindex = $pengirimanindex ?? collect();
 
-        return view('akuncustomer', compact('customer', 'pesanan', 'tab', 'kurir'));
+        return view('akuncustomer', compact('customer', 'pesanan', 'tab', 'kurir', 'pengiriman', 'pengirimanindex'));
     }
     public function updateCustomer(Request $request)
     {
@@ -365,51 +409,46 @@ class HomepageKontrol extends Controller
     }
     public function registerSubmit(Request $request)
     {
-        // NOTE soal konfirmasi password:
-        // Jika input konfirmasi masih name="password_confirmation",
-        // pakai rule 'same:customer_password' di bawah.
-        // Kalau mau pakai 'confirmed', ubah input konfirmasi menjadi
-        // name="customer_password_confirmation".
         $request->validate([
             'customer_nama'         => 'required|string|max:150',
             'customer_email'        => 'required|email:rfc,dns|unique:lixiudiy_customer,customer_email',
             'customer_telepon'      => 'required|string|max:30',
             'customer_alamat'       => 'required|string|max:255',
-            'customer_tanggallahir' => 'required|date', // format Y-m-d dari <input type="date">
+            'customer_tanggallahir' => 'required|date',
             'customer_password'     => 'required|string|min:6',
-            'password_confirmation' => 'required|same:customer_password', // sinkron dengan name di form-mu
+            'password_confirmation' => 'required|same:customer_password',
         ]);
 
         try {
             DB::beginTransaction();
 
-            // Simpan customer
             $customer = ModelCustomer::create([
                 'customer_nama'          => $request->customer_nama,
                 'customer_email'         => $request->customer_email,
                 'customer_telepon'       => $request->customer_telepon,
                 'customer_alamat'        => $request->customer_alamat,
-                'customer_tanggallahir'  => $request->customer_tanggallahir, // pastikan kolomnya DATE
+                'customer_tanggallahir'  => $request->customer_tanggallahir,
                 'customer_password'      => Hash::make($request->customer_password),
-                'customer_status'        => 0,                              // belum aktif
+                'customer_status'        => 0,
                 'customer_tanggaldaftar' => Carbon::now()->format('Y-m-d H:i:s'),
             ]);
 
-            // Generate & simpan kode aktivasi
-            // Generate token aktivasi (5 huruf kapital + angka)
+            // generate token
             $token = strtoupper(Str::random(5));
-            $token = preg_replace('/[^A-Z0-9]/', '', $token); // biar cuma huruf besar & angka
+            $token = preg_replace('/[^A-Z0-9]/', '', $token);
 
             ModelAktivasiAkun::create([
-                'aktivasi_customer' => $customer->customer_id,  // PK di tabel customer-mu
-                'aktivasi_token'     => $token,
+                'aktivasi_customer' => $customer->customer_id,
+                'aktivasi_token'    => $token,
             ]);
 
             DB::commit();
 
-            // (Opsional) kirim email dengan link aktivasi
-            // $link = url('/aktivasi/'.$kode);
-            // Mail::to($customer->customer_email)->send(new AktivasiMail($link));
+            // === Kirim email aktivasi ===
+            Mail::raw("Halo {$customer->customer_nama},\n\nKode aktivasi akunmu adalah: {$token}", function ($message) use ($customer) {
+                $message->to($customer->customer_email)
+                    ->subject('Aktivasi Akun Lixiudiy');
+            });
 
             return redirect()->route('aktivasi.form')
                 ->with('success', 'Registrasi berhasil. Cek email kamu untuk aktivasi akun.');
@@ -491,7 +530,8 @@ class HomepageKontrol extends Controller
     public function logout()
     {
         // Logic for customer logout can be added here
-        return redirect()->route('home');
+        session()->flush();
+        return redirect()->route('home.page');
     }
     public function loginadmin()
     {

@@ -125,7 +125,7 @@
         </div>
 
 
-        <form action="{{ route('konfirmasi.pembayaran') }}" method="POST">
+        <form action="{{ route('konfirmasi.pembayaran') }}" method="POST" enctype="multipart/form-data">
             @csrf
             @php
             $allPesananId = $pesanan->pluck('pesanan_id')->implode(';');
@@ -133,6 +133,7 @@
             <input type="hidden" name="kurir" id="kuririd">
             <input type="hidden" name="pesanan_id" value="{{ $allPesananId }}">
             <input type="hidden" id="totalBayar" name="pembayaran_jumlah">
+            <input type="hidden" name="alamat" value="{{ $pesanan->first()->customer_alamat }}">
 
             <!-- Metode pembayaran -->
             <div class="card mb-4">
@@ -159,6 +160,12 @@
                                 <li><b>Mandiri</b> - 9876543210 a.n PT. Contoh Shop</li>
                                 <li><b>BRI</b> - 555666777 a.n PT. Contoh Shop</li>
                             </ul>
+                        </div>
+                        <div class="mb-3 mt-3">
+                            <label for="bukti" class="form-label">Upload Bukti Transfer (JPG)</label>
+                            <input type="file" class="form-control" name="bukti" id="bukti" accept=".jpg,.jpeg"
+                                required>
+                            <small class="text-muted">File harus JPG.</small>
                         </div>
                     </div>
 
@@ -256,7 +263,7 @@
                 }
             });
         });
-    </script>
+    </script>\
 </body>
 
 </html>
