@@ -201,14 +201,16 @@
                                         <td>{{ $pay->pembayaran_tanggal }}</td>
                                         <td>{{ $pay->pembayaran_metode == '1' ? 'Transfer Bank' : ($pay->pembayaran_metode == '2' ? 'QRIS/E-Wallet' : 'COD') }}
                                         </td>
-                                        <td>{{ $pay->pengiriman_jasakurir }}</td>
+                                        <td>{{ $pengirimankurir->kurir_nama }}</td>
                                         <td>{{ $group['alamat'] }}</td>
                                         <td>{{ $group['nomor'] }}</td>
                                         <td>
                                             @if($pay->pembayaran_status == '0')
                                             <span class="badge bg-warning">Menunggu Konfirmasi</span>
                                             @elseif($pay->pembayaran_status == '1')
-                                            <span class="badge bg-info">Dikonfirmasi</span>
+                                            <span class="badge bg-info">Dikirim</span>
+                                            @elseif($pay->pembayaran_status == '2')
+                                            <span class="badge bg-success">Dikonfirmasi</span>
                                             @endif
                                         </td>
                                         <td>Rp {{ number_format($totalBayar, 0, ',', '.') }}</td>

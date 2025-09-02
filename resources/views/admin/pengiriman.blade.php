@@ -46,52 +46,55 @@
                         </button>
                     </div>
                     <div class="card-body">
-                        <table id="tabelBidang" class="table table-striped table-bordered w-100">
+                        <table class="table">
                             <thead>
                                 <tr>
-                                    <th>#</th>
-                                    <th>Nama Rekomendasi</th>
-                                    <th>Produk</th>
-                                    <th>Harga</th>
-                                    <th>Stok</th>
-                                    <th>Kategori</th>
-                                    <th>Tanggal</th>
-                                    <th>Status</th>
-                                    <th>Aksi</th>
+                                    <th>ID Pengiriman</th>
+                                    <th>Pesanan</th>
+                                    <th>Status Bayar</th>
+                                    <th>Resi</th>
+                                    <th>Status Pengiriman</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($rekomendasi as $no => $b)
+                                @foreach ($pengiriman as $p)
                                 <tr>
-                                    <td>{{ $no+1 }}</td>
-                                    <td>{{ $b->rekomendasi_nama}}</td>
-                                    <td>{{ $b->produk_nama }}</td>
-                                    <td>Rp. {{ number_format($b->produk_harga, 0, ',', '.') }}</td>
-                                    <td>{{ $b->produk_stok }}</td>
-                                    <td>{{ $b->kategori_nama }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($b->rekomendasi_tanggal)->translatedFormat('d F Y') }}
+                                    <td>{{ $p->pengiriman_id }}</td>
+                                    <td>
+                                        <ul>
+                                            @foreach($p->pesanan as $psn)
+                                            <li>
+                                                {{ $psn->produk_nama }}
+                                                (Pesanan #{{ $psn->pesanan_id }})
+                                            </li>
+                                            @endforeach
+                                        </ul>
                                     </td>
                                     <td>
-                                        @if($b->rekomendasi_status == '1')
-                                        <span class="badge bg-success">Aktif</span>
+                                        @if($p->status_bayar)
+                                        ✅ Sudah Bayar
                                         @else
-                                        <span class="badge bg-secondary">Tidak Aktif</span>
+                                        ❌ Belum Bayar
                                         @endif
                                     </td>
                                     <td>
-                                        <button class="btn btn-sm btn-warning btnEdit"
-                                            data-id="{{ $b->rekomendasi_id }}" data-nama="{{ $b->rekomendasi_nama }}"
-                                            data-produk="{{ $b->rekomendasi_produk }}"
-                                            data-status="{{ $b->rekomendasi_status }}"
-                                            data-tanggal="{{ $b->rekomendasi_tanggal }}"
-                                            data-ket="{{ $b->rekomendasi_keterangan }}">
+                                        @if($p->pengiriman_nomor_resi == '-')
+                                        <form action="{{ route('pengiriman.resi', $p->pengiriman_id) }}" method="POST">
+                                            @csrf
+                                            <input type="text" name="resi" placeholder="Input Resi" required>
+                                            <button type="submit" class="btn btn-primary btn-sm">Simpan</button>
+                                        </form>
+                                        @else
 
-                                            Edit
-                                        </button>
-                                        <button class="btn btn-sm btn-danger btnHapus"
-                                            data-id="{{ $b->rekomendasi_id }}" data-nama="{{ $b->rekomendasi_nama }}">
-                                            Hapus
-                                        </button>
+                                        {{ $p->pengiriman_nomor_resi }}
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($p->pengiriman_status == 1)
+                                        🚚 Dikirim
+                                        @else
+                                        ⏳ Menunggu
+                                        @endif
                                     </td>
                                 </tr>
                                 @endforeach
@@ -106,127 +109,6 @@
         </div>
     </div>
 
-    {{-- Modal Tambah --}}
-    <div class="modal fade" id="modalTambah" tabindex="-1" aria-labelledby="modalTambahLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <form action="{{ route('admin.rekomendasi.simpan') }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modalTambahLabel">Tambah Data Rekomendasi Produk</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label>Nama Rekomendasi</label>
-                            <input type="text" class="form-control" name="rekomendasi_nama" required>
-                        </div>
-                        <div class="mb-3">
-                            <label>Produk</label>
-                            <select class="form-select" name="rekomendasi_produk" required>
-                                @foreach ($produk as $k)
-                                <option value="{{ $k->produk_id }}">{{ $k->produk_nama }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label>Tanggal</label>
-                            <input type="date" class="form-control" name="rekomendasi_tanggal" required>
-                        </div>
-                        <div class="mb-3">
-                            <label>Status</label>
-                            <select class="form-select" name="rekomendasi_status" required>
-                                <option value="1">Aktif</option>
-                                <option value="0">Tidak Aktif</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label>Keterangan</label>
-                            <textarea class="form-control" name="rekomendasi_keterangan" rows="3"></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary">Simpan</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    {{-- Modal Edit --}}
-    <div class="modal fade" id="modalEdit" tabindex="-1" aria-labelledby="modalEditLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <form id="formEdit" method="POST" enctype="multipart/form-data">
-                @csrf
-                @method('PUT')
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modalEditLabel">Edit Data Rekomendasi Produk</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label>Nama Rekomendasi</label>
-                            <input type="text" class="form-control" id="edit_nama" name="rekomendasi_nama" required>
-                        </div>
-                        <div class="mb-3">
-                            <label>Produk</label>
-                            <select class="form-select" id="edit_produk" name="rekomendasi_produk" required>
-                                @foreach ($produk as $k)
-                                <option value="{{ $k->produk_id }}">{{ $k->produk_nama }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label>Tanggal</label>
-                            <input type="date" class="form-control" id="edit_tanggalmasuk" name="rekomendasi_tanggal"
-                                required>
-                        </div>
-                        <div class="mb-3">
-                            <label>Status</label>
-                            <select class="form-select" id="edit_status" name="rekomendasi_status" required>
-                                <option value="1">Aktif</option>
-                                <option value="0">Tidak Aktif</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label>Keterangan</label>
-                            <textarea class="form-control" id="edit_ket" name="rekomendasi_keterangan"
-                                rows="3"></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    {{-- Modal Hapus --}}
-    <div class="modal fade" id="modalHapus" tabindex="-1" aria-labelledby="modalHapusLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <form id="formHapus" method="POST">
-                @csrf
-                @method('DELETE')
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modalHapusLabel">Hapus Data</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Yakin ingin menghapus data <b id="hapus_nama"></b>?</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-danger">Hapus</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
 
     {{-- jQuery harus duluan --}}
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>

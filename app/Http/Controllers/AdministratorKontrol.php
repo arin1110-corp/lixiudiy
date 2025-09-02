@@ -12,6 +12,8 @@ use App\Models\ModelPesanan;
 use App\Models\ModelKeranjang;
 use App\Models\ModelLaporanPenjualan;
 use App\Models\ModelRekomendasiProduk;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 
 
@@ -20,8 +22,50 @@ use Illuminate\Http\Request;
 class AdministratorKontrol extends Controller
 {
     //
+    public function login()
+    {
+        return view('loginadmin');
+    }
+    public function loginSubmit(Request $request)
+    {
+
+        $request->validate([
+            'email'    => 'required|email',
+            'password' => 'required|string',
+        ]);
+
+        $admin = ModelAdmin::where('admin_email', $request->email)->first();
+
+        // Email tidak ditemukan
+        if (!$admin) {
+            return back()
+                ->withInput()
+                ->withErrors(['email' => 'Email tidak ditemukan.']);
+        }
+
+        // Password salah
+        if (!Hash::check($request->password, $admin->admin_password)) {
+            return back()
+                ->withInput()
+                ->withErrors(['password' => 'Password salah.']);
+        }
+
+
+        // Login sukses
+        session([
+            'admin_id'   => $admin->admin_id,
+            'admin_nama' => $admin->admin_nama,
+            'admin_email' => $admin->admin_email,
+        ]);
+        return redirect()->route('dashboard');
+    }
     public function index()
     {
+        $adminId = session('admin_id');
+        if (!$adminId) {
+            return redirect()->route('home.page')
+                ->with('error', 'Hanya Untuk Admin');
+        }
         $produk = ModelProduk::count();
         $customer = ModelCustomer::count();
         $pengiriman = ModelPengiriman::count();
@@ -50,11 +94,21 @@ class AdministratorKontrol extends Controller
     // Kelola Data Kategori
     public function kategori()
     {
+        $adminId = session('admin_id');
+        if (!$adminId) {
+            return redirect()->route('home.page')
+                ->with('error', 'Hanya Untuk Admin');
+        }
         $kategori = ModelKategori::all();
         return view('admin.kategori', compact('kategori'));
     }
     public function simpanKategori(Request $request)
     {
+        $adminId = session('admin_id');
+        if (!$adminId) {
+            return redirect()->route('home.page')
+                ->with('error', 'Hanya Untuk Admin');
+        }
         $request->validate([
             'kategori_nama' => 'required|string|max:255',
             'kategori_deskripsi' => 'nullable|string',
@@ -82,6 +136,11 @@ class AdministratorKontrol extends Controller
     }
     public function updateKategori(Request $request, $id)
     {
+        $adminId = session('admin_id');
+        if (!$adminId) {
+            return redirect()->route('home.page')
+                ->with('error', 'Hanya Untuk Admin');
+        }
         $request->validate([
             'kategori_nama' => 'required|string|max:255',
             'kategori_deskripsi' => 'nullable|string',
@@ -112,6 +171,11 @@ class AdministratorKontrol extends Controller
     }
     public function hapusKategori($id)
     {
+        $adminId = session('admin_id');
+        if (!$adminId) {
+            return redirect()->route('home.page')
+                ->with('error', 'Hanya Untuk Admin');
+        }
         $kategori = ModelKategori::findOrFail($id);
 
         // Hapus file gambar kalau ada
@@ -130,6 +194,11 @@ class AdministratorKontrol extends Controller
     // Kelola Data Produk
     public function produk()
     {
+        $adminId = session('admin_id');
+        if (!$adminId) {
+            return redirect()->route('home.page')
+                ->with('error', 'Hanya Untuk Admin');
+        }
         $produk = ModelProduk::join('lixiudiy_kategori', 'lixiudiy_produk.produk_kategori', '=', 'lixiudiy_kategori.kategori_id')
             ->select('lixiudiy_produk.*', 'lixiudiy_kategori.kategori_nama')
             ->get();
@@ -138,6 +207,11 @@ class AdministratorKontrol extends Controller
     }
     public function simpanProduk(Request $request)
     {
+        $adminId = session('admin_id');
+        if (!$adminId) {
+            return redirect()->route('home.page')
+                ->with('error', 'Hanya Untuk Admin');
+        }
         $request->validate([
             'produk_nama' => 'required|string|max:255',
             'produk_deskripsi' => 'nullable|string',
@@ -174,6 +248,11 @@ class AdministratorKontrol extends Controller
     }
     public function updateProduk(Request $request, $id)
     {
+        $adminId = session('admin_id');
+        if (!$adminId) {
+            return redirect()->route('home.page')
+                ->with('error', 'Hanya Untuk Admin');
+        }
         $request->validate([
             'produk_nama' => 'required|string|max:255',
             'produk_deskripsi' => 'nullable|string',
@@ -210,6 +289,11 @@ class AdministratorKontrol extends Controller
     }
     public function hapusProduk($id)
     {
+        $adminId = session('admin_id');
+        if (!$adminId) {
+            return redirect()->route('home.page')
+                ->with('error', 'Hanya Untuk Admin');
+        }
         $produk = ModelProduk::findOrFail($id);
 
         // Hapus file gambar kalau ada
@@ -228,6 +312,11 @@ class AdministratorKontrol extends Controller
     // Kelola Data Rekomendasi Produk
     public function rekomendasi()
     {
+        $adminId = session('admin_id');
+        if (!$adminId) {
+            return redirect()->route('home.page')
+                ->with('error', 'Hanya Untuk Admin');
+        }
         $rekomendasi = ModelRekomendasiProduk::join('lixiudiy_produk', 'lixiudiy_rekomendasi_produk.rekomendasi_produk', '=', 'lixiudiy_produk.produk_id')
             ->join('lixiudiy_kategori', 'lixiudiy_produk.produk_kategori', '=', 'lixiudiy_kategori.kategori_id')
             ->select('lixiudiy_rekomendasi_produk.*', 'lixiudiy_produk.produk_nama', 'lixiudiy_produk.produk_harga', 'lixiudiy_produk.produk_stok', 'lixiudiy_kategori.kategori_nama')
@@ -237,6 +326,11 @@ class AdministratorKontrol extends Controller
     }
     public function simpanRekomendasi(Request $request)
     {
+        $adminId = session('admin_id');
+        if (!$adminId) {
+            return redirect()->route('home.page')
+                ->with('error', 'Hanya Untuk Admin');
+        }
         $request->validate([
             'rekomendasi_nama' => 'required|string|max:255',
             'rekomendasi_tanggal' => 'nullable|date',
@@ -255,6 +349,11 @@ class AdministratorKontrol extends Controller
     }
     public function updateRekomendasi(Request $request, $id)
     {
+        $adminId = session('admin_id');
+        if (!$adminId) {
+            return redirect()->route('home.page')
+                ->with('error', 'Hanya Untuk Admin');
+        }
         $request->validate([
             'rekomendasi_nama' => 'required|string|max:255',
             'rekomendasi_produk' => 'required',
@@ -269,6 +368,11 @@ class AdministratorKontrol extends Controller
     }
     public function hapusRekomendasi($id)
     {
+        $adminId = session('admin_id');
+        if (!$adminId) {
+            return redirect()->route('home.page')
+                ->with('error', 'Hanya Untuk Admin');
+        }
         $rekomendasi = ModelRekomendasiProduk::findOrFail($id);
         // Hapus data dari database
         $rekomendasi->delete();
@@ -280,6 +384,11 @@ class AdministratorKontrol extends Controller
     // Kelola Data Customer
     public function customer()
     {
+        $adminId = session('admin_id');
+        if (!$adminId) {
+            return redirect()->route('home.page')
+                ->with('error', 'Hanya Untuk Admin');
+        }
         $customer = ModelCustomer::all();
         return view('admin.customer', compact('customer'));
     }
@@ -288,6 +397,109 @@ class AdministratorKontrol extends Controller
     // Kelola Data Pesanan
     public function pesanan()
     {
-        $pesanan = ModelPesanan::all();
+        $adminId = session('admin_id');
+        if (!$adminId) {
+            return redirect()->route('home.page')
+                ->with('error', 'Hanya Untuk Admin');
+        }
+        $pembayaran = DB::table('lixiudiy_pembayaran')
+            ->select(
+                'lixiudiy_pembayaran.*',
+                DB::raw('(SELECT customer_nama 
+                  FROM lixiudiy_customer 
+                  JOIN lixiudiy_pesanan 
+                    ON lixiudiy_customer.customer_id = lixiudiy_pesanan.pesanan_customer
+                  WHERE FIND_IN_SET(lixiudiy_pesanan.pesanan_id, REPLACE(lixiudiy_pembayaran.pembayaran_pesanan,";",",")) 
+                  LIMIT 1) as customer_nama')
+            )
+            ->orderBy('pembayaran_id', 'desc')
+            ->get();
+
+        foreach ($pembayaran as $p) {
+            $ids = explode(';', trim($p->pembayaran_pesanan, ';'));
+            $p->pesanan = DB::table('lixiudiy_pesanan')
+                ->join('lixiudiy_produk', 'lixiudiy_pesanan.pesanan_produk', '=', 'lixiudiy_produk.produk_id')
+                ->whereIn('pesanan_id', $ids)
+                ->select(
+                    'lixiudiy_produk.produk_nama',
+                    'lixiudiy_produk.produk_harga',
+                    'lixiudiy_pesanan.pesanan_jumlah',
+                    DB::raw('(lixiudiy_produk.produk_harga * lixiudiy_pesanan.pesanan_jumlah) as total')
+                )
+                ->get();
+
+            $p->total_bayar = $p->pesanan->sum('total');
+        }
+
+        return view('admin.pesanan', compact('pembayaran'));
+    }
+    public function verifikasi($id)
+    {
+        $adminId = session('admin_id');
+        if (!$adminId) {
+            return redirect()->route('home.page')
+                ->with('error', 'Hanya Untuk Admin');
+        }
+        $pembayaran = ModelPembayaran::find($id);
+        $pembayaran->pembayaran_status = 1;
+        $pembayaran->save();
+        return redirect()->back()->with('success', 'Pembayaran berhasil diverifikasi.');
+    }
+    //Akhir Kelola Data Pesanan
+
+    // Kelola Data Pengiriman
+    public function pengiriman()
+    {
+        $adminId = session('admin_id');
+        if (!$adminId) {
+            return redirect()->route('home.page')
+                ->with('error', 'Hanya Untuk Admin');
+        }
+        $pengiriman = ModelPengiriman::all()->map(function ($p) {
+            // Ambil array pesanan dari pengiriman_pesanan
+            $pesananIds = explode(';', $p->pengiriman_pesanan);
+
+            // Ambil data pesanan + pembayaran
+            $p->pesanan = ModelPesanan::whereIn('pesanan_id', $pesananIds)
+                ->leftJoin('lixiudiy_pembayaran', function ($join) {
+                    $join->whereRaw("FIND_IN_SET(lixiudiy_pesanan.pesanan_id, REPLACE(lixiudiy_pembayaran.pembayaran_pesanan, ';', ','))");
+                })
+                ->leftJoin('lixiudiy_produk', 'lixiudiy_pesanan.pesanan_produk', '=', 'lixiudiy_produk.produk_id')
+                ->select(
+                    'lixiudiy_pesanan.*',
+                    'lixiudiy_produk.produk_nama',
+                    'lixiudiy_pembayaran.pembayaran_id',
+                    'lixiudiy_pembayaran.pembayaran_status'
+                )
+                ->get();
+
+            // Jika semua pesanan sudah diverifikasi bayar
+            $p->status_bayar = $p->pesanan->every(fn($x) => $x->pembayaran_status == 1);
+
+            return $p;
+        });
+        return view('admin.pengiriman', compact('pengiriman'));
+    }
+    public function pengirimanResi(Request $request, $id)
+    {
+        $adminId = session('admin_id');
+        if (!$adminId) {
+            return redirect()->route('home.page')
+                ->with('error', 'Hanya Untuk Admin');
+        }
+        $request->validate([
+            'resi' => 'required|string|max:255',
+        ]);
+
+        $request->validate([
+            'resi' => 'required|string|max:255',
+        ]);
+
+        $pengiriman = ModelPengiriman::findOrFail($id);
+        $pengiriman->pengiriman_nomor_resi = $request->resi;
+        $pengiriman->pengiriman_status = 1;
+        $pengiriman->save();
+
+        return redirect()->back()->with('success', 'Nomor resi berhasil diperbarui!');
     }
 }

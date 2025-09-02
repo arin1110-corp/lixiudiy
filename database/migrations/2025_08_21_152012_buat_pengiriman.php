@@ -14,11 +14,11 @@ return new class extends Migration
         //
         Schema::create('lixiudiy_pengiriman', function (Blueprint $table) {
             $table->bigInteger('pengiriman_id')->autoIncrement();
-            $table->bigInteger('pengiriman_pesanan');
+            $table->string('pengiriman_pesanan', 100);
             $table->string('pengiriman_alamat');
             $table->string('pengiriman_jasakurir');
             $table->string('pengiriman_nomor_resi')->nullable();
-            $table->dateTime('pengiriman_tanggal');
+            $table->date('pengiriman_tanggal');
             $table->string('pengiriman_status')->default('pending'); // Default status is 'pending'
             $table->text('pengiriman_keterangan')->nullable();
         });

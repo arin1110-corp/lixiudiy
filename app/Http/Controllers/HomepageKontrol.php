@@ -333,6 +333,10 @@ class HomepageKontrol extends Controller
             ->join('lixiudiy_pesanan', 'lixiudiy_pesanan.pesanan_id', '=', DB::raw("SUBSTRING_INDEX(lixiudiy_pembayaran.pembayaran_pesanan, ';', 1)")) // trik ambil id pertama
             ->where('pesanan_customer', $customerId)
             ->first();
+        $pengirimankurir = ModelKurir::join('lixiudiy_pengiriman', 'lixiudiy_kurir.kurir_id', '=', 'lixiudiy_pengiriman.pengiriman_jasakurir')
+            ->join('lixiudiy_pesanan', 'lixiudiy_pesanan.pesanan_id', '=', DB::raw("SUBSTRING_INDEX(lixiudiy_pengiriman.pengiriman_pesanan, ';', 1)")) // trik ambil id pertama
+            ->where('pesanan_customer', $customerId)
+            ->first();
 
         foreach ($pembayaran as $pay) {
             $ids = explode(';', $pay->pembayaran_pesanan);
@@ -377,7 +381,7 @@ class HomepageKontrol extends Controller
         $pesanan    = $pesanan ?? collect();
         $pengirimanindex = $pengirimanindex ?? collect();
 
-        return view('akuncustomer', compact('customer', 'pesanan', 'tab', 'kurir', 'pengiriman', 'pengirimanindex'));
+        return view('akuncustomer', compact('customer', 'pesanan', 'tab', 'kurir', 'pengiriman', 'pengirimanindex', 'pengirimankurir'));
     }
     public function updateCustomer(Request $request)
     {

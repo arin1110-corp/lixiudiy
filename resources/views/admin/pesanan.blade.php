@@ -42,62 +42,105 @@
                 <div class="card">
                     <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
                         <span>Data Pesanan</span>
-                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalTambah">
-                            <i class="bi bi-plus-lg"></i> Tambah Data
-                        </button>
+
                     </div>
                     <div class="card-body">
-                        <table id="tabelBidang" class="table table-striped table-bordered w-100">
+                        <table class="table table-bordered">
                             <thead>
                                 <tr>
-                                    <th>#</th>
-                                    <th>Nama Rekomendasi</th>
-                                    <th>Produk</th>
-                                    <th>Harga</th>
-                                    <th>Stok</th>
-                                    <th>Kategori</th>
+                                    <th>Kode Bayar</th>
                                     <th>Tanggal</th>
-                                    <th>Status</th>
+                                    <th>Customer</th>
+                                    <th>Total Bayar</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($rekomendasi as $no => $b)
-                                <tr>
-                                    <td>{{ $no+1 }}</td>
-                                    <td>{{ $b->rekomendasi_nama}}</td>
-                                    <td>{{ $b->produk_nama }}</td>
-                                    <td>Rp. {{ number_format($b->produk_harga, 0, ',', '.') }}</td>
-                                    <td>{{ $b->produk_stok }}</td>
-                                    <td>{{ $b->kategori_nama }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($b->rekomendasi_tanggal)->translatedFormat('d F Y') }}
+                                @foreach($pembayaran as $p)
+                                <tr class="table-primary">
+                                    <td>BYR{{ $p->pembayaran_id }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($p->pembayaran_tanggal)->translatedFormat('d F Y') }}
                                     </td>
+                                    <td>{{ $p->customer_nama }}</td>
+                                    <td>Rp {{ number_format($p->total_bayar,0,',','.') }}</td>
                                     <td>
-                                        @if($b->rekomendasi_status == '1')
-                                        <span class="badge bg-success">Aktif</span>
-                                        @else
-                                        <span class="badge bg-secondary">Tidak Aktif</span>
+                                        @if($p->pembayaran_status == '0')
+                                        <button class="btn btn-sm btn-warning btnBukti"
+                                            data-id="{{ $p->pembayaran_id }}">
+                                            Lihat Bukti
+                                        </button>
+                                        <button class="btn btn-sm btn-success btnVerif"
+                                            data-id="{{ $p->pembayaran_id }}">
+                                            Verifikasi
+                                        </button>
+                                        @elseif($p->pembayaran_status == '1')
+                                        <button class="btn btn-sm btn-success">
+                                            <i class="fa fa-check">Sudah Verifikasi</i>
+                                        </button>
                                         @endif
                                     </td>
-                                    <td>
-                                        <button class="btn btn-sm btn-warning btnEdit"
-                                            data-id="{{ $b->rekomendasi_id }}" data-nama="{{ $b->rekomendasi_nama }}"
-                                            data-produk="{{ $b->rekomendasi_produk }}"
-                                            data-status="{{ $b->rekomendasi_status }}"
-                                            data-tanggal="{{ $b->rekomendasi_tanggal }}"
-                                            data-ket="{{ $b->rekomendasi_keterangan }}">
-
-                                            Edit
-                                        </button>
-                                        <button class="btn btn-sm btn-danger btnHapus"
-                                            data-id="{{ $b->rekomendasi_id }}" data-nama="{{ $b->rekomendasi_nama }}">
-                                            Hapus
-                                        </button>
-                                    </td>
                                 </tr>
+
+                                @foreach($p->pesanan as $item)
+                                <tr>
+                                    <td></td>
+                                    <td colspan="2">{{ $item->produk_nama }}</td>
+                                    <td>{{ $item->pesanan_jumlah }} x Rp
+                                        {{ number_format($item->produk_harga,0,',','.') }}
+                                    </td>
+                                    <td>Rp {{ number_format($item->total,0,',','.') }}</td>
+                                </tr>
+                                @endforeach
                                 @endforeach
                             </tbody>
                         </table>
+
+                        <!-- Modal Verifikasi Pembayaran-->
+                        <div class="modal fade" id="verifModal" tabindex="-1" aria-labelledby="verifModalLabel"
+                            aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="verifModalLabel">Verifikasi Pembayaran</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>Apakah Anda yakin ingin memverifikasi pembayaran ini?</p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary"
+                                            data-bs-dismiss="modal">Batal</button>
+                                        <form action="" method="POST" id="verifForm">
+                                            @csrf
+                                            @method('PUT')
+                                            <button type="submit" class="btn btn-primary">Ya, Verifikasi</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modal Bukti Pembayaran -->
+                        <div class="modal fade" id="buktiModal" tabindex="-1" aria-labelledby="buktiModalLabel"
+                            aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="buktiModalLabel">Bukti Pembayaran</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body text-center">
+                                        <img id="buktiImage" src="" class="img-fluid rounded shadow"
+                                            alt="Bukti pembayaran tidak tersedia">
+                                        <div id="buktiEmpty" class="alert alert-warning mt-3 d-none">
+                                            Bukti pembayaran belum tersedia untuk pesanan ini.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -107,127 +150,7 @@
         </div>
     </div>
 
-    {{-- Modal Tambah --}}
-    <div class="modal fade" id="modalTambah" tabindex="-1" aria-labelledby="modalTambahLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <form action="{{ route('admin.rekomendasi.simpan') }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modalTambahLabel">Tambah Data Rekomendasi Produk</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label>Nama Rekomendasi</label>
-                            <input type="text" class="form-control" name="rekomendasi_nama" required>
-                        </div>
-                        <div class="mb-3">
-                            <label>Produk</label>
-                            <select class="form-select" name="rekomendasi_produk" required>
-                                @foreach ($produk as $k)
-                                <option value="{{ $k->produk_id }}">{{ $k->produk_nama }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label>Tanggal</label>
-                            <input type="date" class="form-control" name="rekomendasi_tanggal" required>
-                        </div>
-                        <div class="mb-3">
-                            <label>Status</label>
-                            <select class="form-select" name="rekomendasi_status" required>
-                                <option value="1">Aktif</option>
-                                <option value="0">Tidak Aktif</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label>Keterangan</label>
-                            <textarea class="form-control" name="rekomendasi_keterangan" rows="3"></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary">Simpan</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
 
-    {{-- Modal Edit --}}
-    <div class="modal fade" id="modalEdit" tabindex="-1" aria-labelledby="modalEditLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <form id="formEdit" method="POST" enctype="multipart/form-data">
-                @csrf
-                @method('PUT')
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modalEditLabel">Edit Data Rekomendasi Produk</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label>Nama Rekomendasi</label>
-                            <input type="text" class="form-control" id="edit_nama" name="rekomendasi_nama" required>
-                        </div>
-                        <div class="mb-3">
-                            <label>Produk</label>
-                            <select class="form-select" id="edit_produk" name="rekomendasi_produk" required>
-                                @foreach ($produk as $k)
-                                <option value="{{ $k->produk_id }}">{{ $k->produk_nama }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label>Tanggal</label>
-                            <input type="date" class="form-control" id="edit_tanggalmasuk" name="rekomendasi_tanggal"
-                                required>
-                        </div>
-                        <div class="mb-3">
-                            <label>Status</label>
-                            <select class="form-select" id="edit_status" name="rekomendasi_status" required>
-                                <option value="1">Aktif</option>
-                                <option value="0">Tidak Aktif</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label>Keterangan</label>
-                            <textarea class="form-control" id="edit_ket" name="rekomendasi_keterangan"
-                                rows="3"></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    {{-- Modal Hapus --}}
-    <div class="modal fade" id="modalHapus" tabindex="-1" aria-labelledby="modalHapusLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <form id="formHapus" method="POST">
-                @csrf
-                @method('DELETE')
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modalHapusLabel">Hapus Data</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Yakin ingin menghapus data <b id="hapus_nama"></b>?</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-danger">Hapus</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
 
     {{-- jQuery harus duluan --}}
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -279,6 +202,61 @@
 
                 let modalHapus = new bootstrap.Modal(document.getElementById('modalHapus'));
                 modalHapus.show();
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const modal = new bootstrap.Modal(document.getElementById('buktiModal'));
+            const buktiImage = document.getElementById('buktiImage');
+            const buktiEmpty = document.getElementById('buktiEmpty');
+
+            document.querySelectorAll('.btnBukti').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    let id = this.getAttribute('data-id');
+
+                    // Path file bukti (misal: public/bukti/BYR1.jpg)
+                    let url = `/bukti/BYR${id}.jpg`;
+
+                    // Coba load image
+                    fetch(url, {
+                            method: 'HEAD'
+                        })
+                        .then(res => {
+                            if (res.ok) {
+                                buktiImage.src = url;
+                                buktiImage.classList.remove("d-none");
+                                buktiEmpty.classList.add("d-none");
+                            } else {
+                                buktiImage.classList.add("d-none");
+                                buktiEmpty.classList.remove("d-none");
+                            }
+                        })
+                        .catch(() => {
+                            buktiImage.classList.add("d-none");
+                            buktiEmpty.classList.remove("d-none");
+                        });
+
+                    modal.show();
+                });
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const verifModal = new bootstrap.Modal(document.getElementById('verifModal'));
+            const verifForm = document.getElementById('verifForm');
+
+            document.querySelectorAll('.btnVerif').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    let id = this.getAttribute('data-id');
+
+                    // set action form
+                    verifForm.setAttribute('action', `/admin/pembayaran/verifikasi/${id}`);
+
+                    // show modal
+                    verifModal.show();
+                });
             });
         });
     </script>

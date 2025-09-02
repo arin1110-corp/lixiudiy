@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdministratorKontrol;
 use App\Http\Controllers\HomepageKontrol;
+use Google\Service\AndroidEnterprise\Administrator;
 use Google\Service\Dfareporting\Ad;
 
 //homepage
@@ -13,8 +14,6 @@ Route::get('/kontak-kami', [HomepageKontrol::class, 'contact'])->name('kontak');
 Route::get('/produk', [HomepageKontrol::class, 'produk'])->name('produk');
 Route::get('/detailproduk/{id}', [HomepageKontrol::class, 'detailProduk'])->name('detailproduk');
 Route::get('/daftarproduk/kategori/{id}', [HomepageKontrol::class, 'daftarprodukkategori'])->name('daftarprodukkategori');
-Route::get('/admin-login', [HomepageKontrol::class, 'login'])->name('admin.login');
-Route::post('/admin-login-submit', [HomepageKontrol::class, 'loginSubmit'])->name('admin.login.submit');
 Route::get('/login', [HomepageKontrol::class, 'login'])->name('login');
 Route::post('/login-submit', [HomepageKontrol::class, 'loginSubmit'])->name('customer.login');
 Route::get('/register', [HomepageKontrol::class, 'register'])->name('customer.register');
@@ -42,6 +41,7 @@ Route::get('/pengiriman', [HomepageKontrol::class, 'pengiriman'])->name('pengiri
 
 
 //ADMIN SECTION
+
 Route::get('/dashboard', [AdministratorKontrol::class, 'index'])->name('dashboard');
 Route::get('/admin-login', [AdministratorKontrol::class, 'login'])->name('admin.login');
 Route::post('/admin-login-submit', [AdministratorKontrol::class, 'loginSubmit'])->name('admin.login.submit');
@@ -65,8 +65,11 @@ Route::delete('/admin/rekomendasi/delete/{id}', [AdministratorKontrol::class, 'h
 Route::put('/admin/rekomendasi/update/{id}', [AdministratorKontrol::class, 'updateRekomendasi'])->name('admin.rekomendasi.update');
 
 Route::get('/admin/pengiriman', [AdministratorKontrol::class, 'pengiriman'])->name('admin.pengiriman');
+Route::post('/admin/pengiriman/resi/{id}', [AdministratorKontrol::class, 'pengirimanResi'])->name('pengiriman.resi');
 
-Route::get('/admin/pesanan', [AdministratorKontrol::class, 'pesanan'])->name('admin.pesanan');
+Route::get('/admin/pesanan', [AdministratorKontrol::class, 'pesanan'])->name('admin.pesanan'); // web.php
+Route::put('/admin/pembayaran/verifikasi/{id}', [AdministratorKontrol::class, 'verifikasi'])->name('admin.pembayaran.verifikasi');
+
 
 
 Route::get('/admin/laporan', [AdministratorKontrol::class, 'laporan'])->name('admin.laporan');
