@@ -27,7 +27,7 @@
 
             <p>
                 Semua produk kami dibuat dengan detail, menggunakan bahan pilihan, dan dikerjakan
-                langsung oleh pengrajin lokal. Dengan membeli produk Crochet Lixiu, Anda tidak hanya
+                langsung oleh pengrajin lokal. Dengan membeli produk Crochet Lixiu DIY, Anda tidak hanya
                 mendapatkan barang unik, tetapi juga mendukung karya UMKM Indonesia.
             </p>
 
@@ -40,21 +40,6 @@
                 </ul>
             </div>
 
-            <div class="tim">
-                <h2>Tim Kami</h2>
-                <div class="tim-grid">
-                    <div class="tim-card">
-                        <img src="{{ asset('tim/tim1.jpg') }}" alt="Founder">
-                        <h3>Nama Founder</h3>
-                        <p>Pendiri & Desainer Utama</p>
-                    </div>
-                    <div class="tim-card">
-                        <img src="{{ asset('tim/tim2.jpg') }}" alt="Marketing">
-                        <h3>Nama Anggota</h3>
-                        <p>Marketing & Customer Support</p>
-                    </div>
-                </div>
-            </div>
         </div>
     </section>
 

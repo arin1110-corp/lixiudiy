@@ -8,16 +8,55 @@
     <link rel="icon" href="{{ asset('images/logo.png') }}" type="image/png">
     <link rel="stylesheet" href="{{ asset('css/home.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* Pastikan wrapper tidak overflow */
+        .slider-wrapper {
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .product-grid,
+        .kategori-grid {
+            display: flex;
+            transition: transform 0.4s ease-in-out;
+            gap: 1rem;
+        }
+
+        .product-card,
+        .kategori-card {
+            min-width: 200px;
+            flex-shrink: 0;
+        }
+
+        .prev,
+        .next {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            padding: 10px;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .prev {
+            left: 0;
+        }
+
+        .next {
+            right: 0;
+        }
+    </style>
 </head>
 
 <body>
-
     {{-- HEADER --}}
     @include('partials.header')
 
-    {{-- SECTION HERO --}}
-
-    {{-- SLIDER --}}
+    {{-- SLIDER HERO --}}
     <section class="slider">
         <div class="slides fade">
             <img src="{{ asset('images/slide/slider1.png') }}" alt="Slide 1">
@@ -46,9 +85,8 @@
         </div>
     </section>
 
-
     {{-- KATEGORI PRODUK --}}
-    <a <section class="kategori">
+    <section class="kategori">
         <h2>Kategori Produk</h2>
         <div class="slider-wrapper">
             <button class="prev" onclick="slideKategori(-1)">&#10094;</button>
@@ -64,62 +102,65 @@
             </div>
             <button class="next" onclick="slideKategori(1)">&#10095;</button>
         </div>
-        </section>
+    </section>
 
+    {{-- FOOTER --}}
+    @include('partials.footer')
 
-        {{-- FOOTER --}}
-        @include('partials.footer')
+    <script>
+        let produkIndex = 0;
+        let kategoriIndex = 0;
 
-        <script>
-            let produkIndex = 0;
-            let kategoriIndex = 0;
+        const produkGrid = document.getElementById("product-slider");
+        const kategoriGrid = document.getElementById("kategori-slider");
+        const produkItems = produkGrid.children;
+        const kategoriItems = kategoriGrid.children;
 
-            const produkGrid = document.getElementById("product-slider");
-            const kategoriGrid = document.getElementById("kategori-slider");
-            const produkItems = produkGrid.children;
-            const kategoriItems = kategoriGrid.children;
+        function slide(grid, items, step, indexVar) {
+            const itemWidth = items[0].offsetWidth + 16; // +16px kira² gap
+            const visible = Math.floor(grid.parentElement.offsetWidth / itemWidth);
+            const maxIndex = Math.max(items.length - visible, 0);
 
-            function getVisibleCount(gridElement) {
-                const wrapperWidth = gridElement.parentElement.offsetWidth; // lebar viewport
-                const itemWidth = gridElement.children[0].offsetWidth; // lebar 1 item
-                return Math.floor(wrapperWidth / itemWidth) || 1;
+            if (indexVar === "produkIndex") {
+                produkIndex = Math.min(Math.max(produkIndex + step, 0), maxIndex);
+                grid.style.transform = `translateX(-${produkIndex * itemWidth}px)`;
+            } else {
+                kategoriIndex = Math.min(Math.max(kategoriIndex + step, 0), maxIndex);
+                grid.style.transform = `translateX(-${kategoriIndex * itemWidth}px)`;
             }
+        }
 
-            function slideProduk(step) {
-                const visible = getVisibleCount(produkGrid);
-                const maxIndex = Math.max(produkItems.length - visible, 0);
-                produkIndex = (produkIndex + step + (maxIndex + 1)) % (maxIndex + 1);
-                produkGrid.style.transform = `translateX(-${produkIndex * (100 / visible)}%)`;
-            }
+        function slideProduk(step) {
+            slide(produkGrid, produkItems, step, "produkIndex");
+        }
 
-            function slideKategori(step) {
-                const visible = getVisibleCount(kategoriGrid);
-                const maxIndex = Math.max(kategoriItems.length - visible, 0);
-                kategoriIndex = (kategoriIndex + step + (maxIndex + 1)) % (maxIndex + 1);
-                kategoriGrid.style.transform = `translateX(-${kategoriIndex * (100 / visible)}%)`;
-            }
+        function slideKategori(step) {
+            slide(kategoriGrid, kategoriItems, step, "kategoriIndex");
+        }
 
-            // Auto slide
-            setInterval(() => slideProduk(1), 4000);
-            setInterval(() => slideKategori(1), 5000);
+        // Auto slide
+        setInterval(() => slideProduk(1), 4000);
+        setInterval(() => slideKategori(1), 5000);
 
-            // Resize
-            window.addEventListener("resize", () => {
-                slideProduk(0);
-                slideKategori(0);
-            });
-            let slideIndex = 0;
-            const slides = document.querySelectorAll(".slider img");
+        // Resize
+        window.addEventListener("resize", () => {
+            slideProduk(0);
+            slideKategori(0);
+        });
 
-            function showSlides() {
-                slides.forEach(slide => slide.classList.remove("active"));
-                slideIndex = (slideIndex + 1) > slides.length ? 1 : slideIndex + 1;
-                slides[slideIndex - 1].classList.add("active");
-            }
+        // SLIDER HERO
+        let slideIndex = 0;
+        const slides = document.querySelectorAll(".slider img");
 
-            // Pertama tampilkan gambar awal
-            slides[0].classList.add("active");
+        function showSlides() {
+            slides.forEach(slide => slide.classList.remove("active"));
+            slideIndex = (slideIndex + 1) > slides.length ? 1 : slideIndex + 1;
+            slides[slideIndex - 1].classList.add("active");
+        }
 
-            // Auto slide tiap 4 detik
-            setInterval(showSlides, 4000);
-        </script>
+        slides[0].classList.add("active");
+        setInterval(showSlides, 4000);
+    </script>
+</body>
+
+</html>
