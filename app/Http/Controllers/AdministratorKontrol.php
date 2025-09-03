@@ -459,25 +459,39 @@ class AdministratorKontrol extends Controller
             // Ambil array pesanan dari pengiriman_pesanan
             $pesananIds = explode(';', $p->pengiriman_pesanan);
 
-            // Ambil data pesanan + pembayaran
-            $p->pesanan = ModelPesanan::whereIn('pesanan_id', $pesananIds)
-                ->leftJoin('lixiudiy_pembayaran', function ($join) {
-                    $join->whereRaw("FIND_IN_SET(lixiudiy_pesanan.pesanan_id, REPLACE(lixiudiy_pembayaran.pembayaran_pesanan, ';', ','))");
-                })
+            // Ambil data pesanan
+            $pesanan = ModelPesanan::whereIn('pesanan_id', $pesananIds)
                 ->leftJoin('lixiudiy_produk', 'lixiudiy_pesanan.pesanan_produk', '=', 'lixiudiy_produk.produk_id')
-                ->select(
-                    'lixiudiy_pesanan.*',
-                    'lixiudiy_produk.produk_nama',
-                    'lixiudiy_pembayaran.pembayaran_id',
-                    'lixiudiy_pembayaran.pembayaran_status'
-                )
+                ->select('lixiudiy_pesanan.*', 'lixiudiy_produk.produk_nama')
                 ->get();
 
+            // Ambil pembayaran yang terkait dengan pesanan ini
+            $pembayaran = ModelPembayaran::all()->mapWithKeys(function ($bayar) {
+                $ids = explode(';', $bayar->pembayaran_pesanan);
+                return [$bayar->pembayaran_id => $ids];
+            });
+
+            // Tambahkan info pembayaran ke setiap pesanan
+            $pesanan->transform(function ($item) use ($pembayaran) {
+                foreach ($pembayaran as $pembayaran_id => $pesanan_ids) {
+                    if (in_array($item->pesanan_id, $pesanan_ids)) {
+                        $item->pembayaran_id = $pembayaran_id;
+                        $item->pembayaran_status = ModelPembayaran::find($pembayaran_id)->pembayaran_status;
+                        break; // stop di pembayaran pertama yang ketemu
+                    }
+                }
+                return $item;
+            });
+
+            // Assign pesanan ke pengiriman
+            $p->pesanan = $pesanan;
+
             // Jika semua pesanan sudah diverifikasi bayar
-            $p->status_bayar = $p->pesanan->every(fn($x) => $x->pembayaran_status == 1);
+            $p->status_bayar = $pesanan->every(fn($x) => $x->pembayaran_status == 1);
 
             return $p;
         });
+
         return view('admin.pengiriman', compact('pengiriman'));
     }
     public function pengirimanResi(Request $request, $id)

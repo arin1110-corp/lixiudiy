@@ -8,38 +8,39 @@
     <link rel="icon" href="{{ asset('images/logo.png') }}" type="image/png">
     <link rel="stylesheet" href="{{ asset('css/home.css') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-    body {
-        background-color: #f8f9fa;
-    }
+        body {
+            background-color: #f8f9fa;
+        }
 
-    .card {
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    }
+        .card {
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
 
-    .card-header {
-        background: #ffffff;
-        font-weight: bold;
-        font-size: 1.1rem;
-        border-bottom: 1px solid #eee;
-    }
+        .card-header {
+            background: #ffffff;
+            font-weight: bold;
+            font-size: 1.1rem;
+            border-bottom: 1px solid #eee;
+        }
 
-    h3 {
-        font-weight: 700;
-    }
+        h3 {
+            font-weight: 700;
+        }
 
-    .btn-success {
-        border-radius: 10px;
-        padding: 12px 30px;
-        font-size: 1.1rem;
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-        transition: 0.3s;
-    }
+        .btn-success {
+            border-radius: 10px;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+            transition: 0.3s;
+        }
 
-    .btn-success:hover {
-        transform: translateY(-2px);
-    }
+        .btn-success:hover {
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 
@@ -211,55 +212,55 @@
 
     @include('partials.footer')
     <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // pastikan angka mentah (tanpa pemisah ribuan) masuk ke JS
-        const subtotal = Number("{{ (float) $subtotal }}");
-        console.log(subtotal);
-        const kurirSelect = document.getElementById("kurir");
-        const ongkirEl = document.getElementById("ongkir");
-        const kurir = document.getElementById("kurir");
-        const kurirInput = document.getElementById("kuririd");
-        const totalEl = document.getElementById("total");
-        const totalBayarInput = document.getElementById("totalBayar");
+        document.addEventListener("DOMContentLoaded", function() {
+            // pastikan angka mentah (tanpa pemisah ribuan) masuk ke JS
+            const subtotal = Number("{{ (float) $subtotal }}");
+            console.log(subtotal);
+            const kurirSelect = document.getElementById("kurir");
+            const ongkirEl = document.getElementById("ongkir");
+            const kurir = document.getElementById("kurir");
+            const kurirInput = document.getElementById("kuririd");
+            const totalEl = document.getElementById("total");
+            const totalBayarInput = document.getElementById("totalBayar");
 
-        const rupiah = (n) => n.toLocaleString("id-ID");
+            const rupiah = (n) => n.toLocaleString("id-ID");
 
-        function updateTotal() {
-            const opt = kurirSelect?.options[kurirSelect.selectedIndex];
-            const ongkir = Number(opt?.dataset.ongkir ?? 0);
-            const total = subtotal + ongkir;
+            function updateTotal() {
+                const opt = kurirSelect?.options[kurirSelect.selectedIndex];
+                const ongkir = Number(opt?.dataset.ongkir ?? 0);
+                const total = subtotal + ongkir;
 
-            ongkirEl.textContent = rupiah(ongkir);
-            totalEl.textContent = rupiah(total);
+                ongkirEl.textContent = rupiah(ongkir);
+                totalEl.textContent = rupiah(total);
 
-            // simpan nilai mentah ke form (biar masuk DB)
-            totalBayarInput.value = total;
-            kurirInput.value = kurir.value;
-        }
+                // simpan nilai mentah ke form (biar masuk DB)
+                totalBayarInput.value = total;
+                kurirInput.value = kurir.value;
+            }
 
-        if (kurirSelect) {
-            // hitung saat halaman pertama kali load
-            updateTotal();
-            // hitung ulang saat kurir diganti
-            kurirSelect.addEventListener("change", updateTotal);
-        }
-    });
-    </script>
-    <script>
-    // Perbaikan: pakai name="pembayaran_metode"
-    document.querySelectorAll('input[name="pembayaran_metode"]').forEach((radio) => {
-        radio.addEventListener("change", function() {
-            document.querySelectorAll(".payment-step").forEach((step) => step.style.display = "none");
-
-            if (this.value === "1") {
-                document.getElementById("transferStep").style.display = "block";
-            } else if (this.value === "2") {
-                document.getElementById("ewalletStep").style.display = "block";
-            } else if (this.value === "3") {
-                document.getElementById("codStep").style.display = "block";
+            if (kurirSelect) {
+                // hitung saat halaman pertama kali load
+                updateTotal();
+                // hitung ulang saat kurir diganti
+                kurirSelect.addEventListener("change", updateTotal);
             }
         });
-    });
+    </script>
+    <script>
+        // Perbaikan: pakai name="pembayaran_metode"
+        document.querySelectorAll('input[name="pembayaran_metode"]').forEach((radio) => {
+            radio.addEventListener("change", function() {
+                document.querySelectorAll(".payment-step").forEach((step) => step.style.display = "none");
+
+                if (this.value === "1") {
+                    document.getElementById("transferStep").style.display = "block";
+                } else if (this.value === "2") {
+                    document.getElementById("ewalletStep").style.display = "block";
+                } else if (this.value === "3") {
+                    document.getElementById("codStep").style.display = "block";
+                }
+            });
+        });
     </script>\
 </body>
 

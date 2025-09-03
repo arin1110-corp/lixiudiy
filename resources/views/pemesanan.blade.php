@@ -92,7 +92,8 @@
                         <hr>
                         <div class="d-flex justify-content-between mb-3">
                             <span>Total:</span>
-                            <strong>Rp <span id="total">{{ number_format($subtotal, 0, ',', '.') }}</span></strong>
+                            <strong>Rp <span
+                                    id="total">{{ number_format($pesanan->sum('pesanan_total_harga'), 0, ',', '.') }}</span></strong>
                         </div>
                         <a href="{{route('pembayaran.form')}}"><button class="btn btn-success w-100">Bayar
                                 Sekarang</button>

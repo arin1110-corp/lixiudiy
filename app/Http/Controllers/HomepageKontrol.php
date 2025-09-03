@@ -105,6 +105,7 @@ class HomepageKontrol extends Controller
             ->get();
         $rinciantotalharga = ModelKeranjang::where('keranjang_customer', $customerId)
             ->selectRaw('SUM(keranjang_total_harga) as total_harga, sum(keranjang_jumlah) as total_produk')
+            ->where('keranjang_status', 0)
             ->first();
         $totalHarga = $keranjang->sum('keranjang_total_harga');
         return view('keranjang', compact('keranjang', 'totalHarga', 'rinciantotalharga'));
@@ -309,74 +310,115 @@ class HomepageKontrol extends Controller
         $customerId = session('customer_id');
         if (!$customerId) {
             return redirect()->route('login')
-                ->with('error', 'Silakan login terlebih dahulu untuk mengakses halaman ini.');
+                ->with('error', 'Silakan login terlebih dahulu.');
         }
 
         $customer = ModelCustomer::find($customerId);
 
-        $pembayaran = ModelPembayaran::whereIn('pembayaran_id', function ($q) use ($customerId) {
-            $q->select('pembayaran_id')
-                ->from('lixiudiy_pembayaran')
-                ->join('lixiudiy_kurir', 'lixiudiy_pembayaran.pembayaran_keterangan', '=', 'lixiudiy_kurir.kurir_id')
-                ->join('lixiudiy_pesanan', 'lixiudiy_pesanan.pesanan_id', '=', DB::raw("SUBSTRING_INDEX(lixiudiy_pembayaran.pembayaran_pesanan, ';', 1)")) // trik ambil id pertama
-                ->where('pesanan_customer', $customerId);
-        })->get();
+        $pesanan = [];
+        $pengirimanindex = [];
 
-        $pesanan = collect();
-        $kurir = ModelKurir::join('lixiudiy_pembayaran', 'lixiudiy_kurir.kurir_id', '=', 'lixiudiy_pembayaran.pembayaran_keterangan')
-            ->join('lixiudiy_pesanan', 'lixiudiy_pesanan.pesanan_id', '=', DB::raw("SUBSTRING_INDEX(lixiudiy_pembayaran.pembayaran_pesanan, ';', 1)")) // trik ambil id pertama
-            ->where('pesanan_customer', $customerId)
-            ->first();
-        $pengirimankurir = ModelKurir::join('lixiudiy_pengiriman', 'lixiudiy_kurir.kurir_id', '=', 'lixiudiy_pengiriman.pengiriman_jasakurir')
-            ->join('lixiudiy_pesanan', 'lixiudiy_pesanan.pesanan_id', '=', DB::raw("SUBSTRING_INDEX(lixiudiy_pengiriman.pengiriman_pesanan, ';', 1)")) // trik ambil id pertama
-            ->where('pesanan_customer', $customerId)
-            ->first();
+        // --- CEK PESANAN BELUM BAYAR ---
+        $pesananBelumBayar = DB::table('lixiudiy_pesanan')
+            ->join('lixiudiy_produk', 'lixiudiy_pesanan.pesanan_produk', '=', 'lixiudiy_produk.produk_id')
+            ->where('lixiudiy_pesanan.pesanan_customer', $customerId)
+            ->where('lixiudiy_pesanan.pesanan_status', 0) // status 0 = belum dibayar
+            ->select('lixiudiy_pesanan.*', 'lixiudiy_produk.*')
+            ->get();
 
-        foreach ($pembayaran as $pay) {
-            $ids = explode(';', $pay->pembayaran_pesanan);
-
-            $items = DB::table('lixiudiy_pesanan')
-                ->join('lixiudiy_produk', 'lixiudiy_pesanan.pesanan_produk', '=', 'lixiudiy_produk.produk_id')
-                ->whereIn('lixiudiy_pesanan.pesanan_id', $ids)
-                ->select('lixiudiy_pesanan.*', 'lixiudiy_produk.*')
-                ->get();
-
-            // ambil data pengiriman berdasarkan pesanan yang sama
-            $pengiriman = ModelPengiriman::whereIn('pengiriman_pesanan', $ids)->first();
-
-            $pengirimanindex[$pay->pembayaran_id] = [
-                'pembayaran' => $pay,
-                'items'      => $items,
-                'alamat'     => $pengiriman ? $pengiriman->pengiriman_alamat : '-',
-                'kurir'      => $pengiriman ? $pengiriman->pengiriman_jasakurir : null,
-                'nomor'      => $pengiriman ? $pengiriman->pengiriman_nomor_resi : '-',
+        foreach ($pesananBelumBayar as $p) {
+            $pesanan["new-" . $p->pesanan_id] = [
+                'pembayaran'   => null,
+                'items'        => collect([$p]),
+                'status_bayar' => 'Belum Dibayar',
+                'kurir'        => null,
+                'action'       => 'bayar',
             ];
         }
 
+        // --- CEK PESANAN YANG SUDAH ADA PEMBAYARAN ---
+        $pembayaran = ModelPembayaran::all();
+
         foreach ($pembayaran as $pay) {
-            // Pecah semua pesanan_id dalam string "1;2;3"
             $ids = explode(';', $pay->pembayaran_pesanan);
 
             $items = DB::table('lixiudiy_pesanan')
                 ->join('lixiudiy_produk', 'lixiudiy_pesanan.pesanan_produk', '=', 'lixiudiy_produk.produk_id')
                 ->whereIn('lixiudiy_pesanan.pesanan_id', $ids)
+                ->where('lixiudiy_pesanan.pesanan_customer', $customerId)
                 ->select('lixiudiy_pesanan.*', 'lixiudiy_produk.*')
                 ->get();
+
+            if ($items->isEmpty()) continue;
+
+            if (is_null($pay->pembayaran_status)) {
+                $status_bayar = 'Belum Dibayar';
+                $action = 'bayar';
+            } elseif ($pay->pembayaran_status == 0) {
+                $status_bayar = 'Menunggu Konfirmasi';
+                $action = null;
+            } elseif ($pay->pembayaran_status == 1) {
+                $status_bayar = 'Sudah Dikonfirmasi';
+                $action = null;
+            } else {
+                $status_bayar = 'Tidak Dikenal';
+                $action = null;
+            }
 
             $pesanan[$pay->pembayaran_id] = [
-                'pembayaran' => $pay,
-                'items'      => $items,
+                'pembayaran'   => $pay,
+                'items'        => $items,
+                'status_bayar' => $status_bayar,
+                'kurir'        => $pay->pembayaran_keterangan,
+                'action'       => $action,
             ];
         }
 
-        $tab = $request->query('tab', 'profil');
-        $pengiriman = $pengiriman ?? collect();
-        $kurir      = $kurir ?? collect();
-        $pesanan    = $pesanan ?? collect();
-        $pengirimanindex = $pengirimanindex ?? collect();
+        // --- CEK PENGIRIMAN ---
+        $pengiriman = ModelPengiriman::all();
 
-        return view('akuncustomer', compact('customer', 'pesanan', 'tab', 'kurir', 'pengiriman', 'pengirimanindex', 'pengirimankurir'));
+        foreach ($pengiriman as $kirim) {
+            $ids = explode(';', $kirim->pengiriman_pesanan);
+
+            $items = DB::table('lixiudiy_pesanan')
+                ->join('lixiudiy_produk', 'lixiudiy_pesanan.pesanan_produk', '=', 'lixiudiy_produk.produk_id')
+                ->whereIn('lixiudiy_pesanan.pesanan_id', $ids)
+                ->where('lixiudiy_pesanan.pesanan_customer', $customerId)
+                ->select('lixiudiy_pesanan.*', 'lixiudiy_produk.*')
+                ->get();
+
+            if ($items->isEmpty()) continue;
+
+            if ($kirim->pengiriman_status == 0) {
+                $status_kirim = 'Belum Dikirim';
+            } elseif ($kirim->pengiriman_status == 1) {
+                $status_kirim = 'Sudah Dikirim';
+            } elseif ($kirim->pengiriman_status == 2) {
+                $status_kirim = 'Diterima Customer';
+            } else {
+                $status_kirim = 'Tidak Dikenal';
+            }
+
+            $pengirimanindex[$kirim->pengiriman_id] = [
+                'pengiriman'   => $kirim,
+                'items'        => $items,
+                'status_kirim' => $status_kirim,
+                'alamat'       => $kirim->pengiriman_alamat,
+                'nomor'        => $kirim->pengiriman_nomor_resi,
+                'kurir'        => $kirim->pengiriman_jasakurir,
+            ];
+        }
+
+        return view('akuncustomer', compact(
+            'customer',
+            'pesanan',
+            'pengirimanindex'
+        ));
     }
+
+
+
+
     public function updateCustomer(Request $request)
     {
         $request->validate([

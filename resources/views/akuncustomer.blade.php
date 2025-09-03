@@ -30,7 +30,6 @@
             <!-- Sidebar -->
             <div class="col-md-3 mb-4">
                 <div class="list-group shadow-sm">
-
                     <a href="#pesanan" class="list-group-item list-group-item-action active" data-bs-toggle="tab">
                         <i class="fa fa-box me-2"></i> Pesanan Saya
                     </a>
@@ -50,7 +49,6 @@
             <div class="col-md-9">
                 <div class="tab-content">
 
-
                     {{-- PESANAN --}}
                     <div class="tab-pane fade show active" id="pesanan">
                         <div class="card shadow-sm p-4 rounded-4">
@@ -60,7 +58,7 @@
                             <div class="alert alert-success">{{ session('success') }}</div>
                             @endif
 
-                            @if($pesanan->isEmpty())
+                            @if(empty($pesanan))
                             <p>Belum ada pesanan.</p>
                             @else
                             <table class="table table-bordered">
@@ -68,40 +66,60 @@
                                     <tr>
                                         <th>Kode Pesanan</th>
                                         <th>Tanggal</th>
-                                        <th>Metode Pembayaran</th>
-                                        <th>Metode Pengiriman</th>
-                                        <th>Status</th>
+                                        <th>Status Pembayaran</th>
                                         <th>Total</th>
+                                        <th>Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach($pesanan as $pembayaranId => $group)
                                     @php
-                                    $pay = $group['pembayaran'];
+                                    $pay = $group['pembayaran']; // bisa null
                                     $items = $group['items'];
+                                    $status = $group['status_bayar'];
+                                    $action = $group['action'];
                                     $totalBayar = $items->sum(fn($i) => $i->pesanan_jumlah * $i->produk_harga);
                                     $collapseId = 'detail-' . $pembayaranId;
                                     @endphp
 
-                                    <tr data-bs-toggle="collapse" data-bs-target="#{{ $collapseId }}"
-                                        style="cursor:pointer;">
-                                        <td>#ORD{{ $pembayaranId }}</td>
-                                        <td>{{ $pay->pembayaran_tanggal }}</td>
-                                        <td>{{ $pay->pembayaran_metode == '1' ? 'Transfer Bank' : ($pay->pembayaran_metode == '2' ? 'E-Wallet' : 'COD') }}
+                                    <tr>
+                                        <td data-bs-toggle="collapse" data-bs-target="#{{ $collapseId }}"
+                                            style="cursor:pointer;">
+                                            #ORD{{ $pembayaranId }}
                                         </td>
-                                        <td>{{ $kurir->kurir_nama }}</td>
+                                        <td data-bs-toggle="collapse" data-bs-target="#{{ $collapseId }}"
+                                            style="cursor:pointer;">
+                                            @if ($pay)
+                                            {{ $pay->pembayaran_tanggal }}
+                                            @else
+                                            <span class="text-danger">Belum ada pembayaran</span>
+                                            @endif
+                                        </td>
                                         <td>
-                                            @if($pay->pembayaran_status == '0')
-                                            <span class="badge bg-warning">Menunggu Konfirmasi</span>
-                                            @elseif($pay->pembayaran_status == '1')
-                                            <span class="badge bg-info">Dikonfirmasi</span>
+                                            @if($status == 'Belum Dibayar')
+                                            <span class="badge bg-danger">{{ $status }}</span>
+                                            @elseif($status == 'Menunggu Konfirmasi')
+                                            <span class="badge bg-warning">{{ $status }}</span>
+                                            @elseif($status == 'Sudah Dikonfirmasi')
+                                            <span class="badge bg-success">{{ $status }}</span>
+                                            @else
+                                            <span class="badge bg-secondary">{{ $status }}</span>
                                             @endif
                                         </td>
                                         <td>Rp {{ number_format($totalBayar, 0, ',', '.') }}</td>
+                                        <td>
+                                            @if($action === 'bayar')
+                                            <a href="{{ route('pembayaran.form', $pembayaranId) }}"
+                                                class="btn btn-sm btn-success"
+                                                onclick="event.stopPropagation()">Bayar</a>
+                                            @else
+                                            <span class="text-muted">-</span>
+                                            @endif
+                                        </td>
                                     </tr>
 
                                     <tr class="collapse bg-light" id="{{ $collapseId }}">
-                                        <td colspan="4">
+                                        <td colspan="5">
                                             <strong>Produk Dibeli:</strong>
                                             <ul class="mb-0">
                                                 @foreach($items as $it)
@@ -123,6 +141,7 @@
                             @endif
                         </div>
                     </div>
+
                     {{-- PROFIL --}}
                     <div class="tab-pane fade show" id="profil">
                         <div class="card shadow-sm p-4 rounded-4">
@@ -133,7 +152,7 @@
                                 <div class="mb-3">
                                     <label class="form-label fw-bold">Nama Lengkap</label>
                                     <input type="text" class="form-control" name="customer_nama"
-                                        value="{{$customer->customer_nama}}">
+                                        value="{{ $customer->customer_nama }}">
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label fw-bold">Email</label>
@@ -160,74 +179,61 @@
                         </div>
                     </div>
 
-
                     {{-- PENGIRIMAN --}}
                     <div class="tab-pane fade" id="pengiriman">
                         <div class="card shadow-sm p-4 rounded-4">
-                            <h4 class="mb-4">Pesanan Saya</h4>
+                            <h4 class="mb-4">Pengiriman</h4>
 
-                            @if(session('success'))
-                            <div class="alert alert-success">{{ session('success') }}</div>
-                            @endif
-
-                            @if($pesanan->isEmpty())
+                            @if(empty($pengirimanindex))
                             <p>Belum ada pengiriman.</p>
                             @else
                             <table class="table table-bordered">
                                 <thead>
                                     <tr>
-                                        <th>Kode Pesanan</th>
-                                        <th>Tanggal</th>
-                                        <th>Metode Pembayaran</th>
-                                        <th>Metode Pengiriman</th>
-                                        <th>Alamat Pengiriman</th>
+                                        <th>Kode Pengiriman</th>
+                                        <th>Alamat</th>
                                         <th>Nomor Resi</th>
                                         <th>Status</th>
-                                        <th>Total</th>
+                                        <th>Produk</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($pengirimanindex as $pembayaranId => $group)
+                                    @foreach($pengirimanindex as $pengirimanId => $group)
                                     @php
-                                    $pay = $group['pembayaran'];
+                                    $kirim = $group['pengiriman'];
                                     $items = $group['items'];
-                                    $totalBayar = $items->sum(fn($i) => $i->pesanan_jumlah * $i->produk_harga);
-                                    $collapseId = 'detail-' . $pembayaranId;
+                                    $status = $group['status_kirim'];
+                                    $collapseId = 'kirim-' . $pengirimanId;
                                     @endphp
 
                                     <tr data-bs-toggle="collapse" data-bs-target="#{{ $collapseId }}"
                                         style="cursor:pointer;">
-                                        <td>#ORD{{ $pembayaranId }}</td>
-                                        <td>{{ $pay->pembayaran_tanggal }}</td>
-                                        <td>{{ $pay->pembayaran_metode == '1' ? 'Transfer Bank' : ($pay->pembayaran_metode == '2' ? 'QRIS/E-Wallet' : 'COD') }}
-                                        </td>
-                                        <td>{{ $pengirimankurir->kurir_nama }}</td>
+                                        <td>#SHP{{ $pengirimanId }}</td>
                                         <td>{{ $group['alamat'] }}</td>
                                         <td>{{ $group['nomor'] }}</td>
                                         <td>
-                                            @if($pay->pembayaran_status == '0')
-                                            <span class="badge bg-warning">Menunggu Konfirmasi</span>
-                                            @elseif($pay->pembayaran_status == '1')
-                                            <span class="badge bg-info">Dikirim</span>
-                                            @elseif($pay->pembayaran_status == '2')
-                                            <span class="badge bg-success">Dikonfirmasi</span>
+                                            @if($status == 'Belum Dikirim')
+                                            <span class="badge bg-danger">{{ $status }}</span>
+                                            @elseif($status == 'Sudah Dikirim')
+                                            <span class="badge bg-warning">{{ $status }}</span>
+                                            @elseif($status == 'Diterima Customer')
+                                            <span class="badge bg-success">{{ $status }}</span>
+                                            @else
+                                            <span class="badge bg-secondary">{{ $status }}</span>
                                             @endif
                                         </td>
-                                        <td>Rp {{ number_format($totalBayar, 0, ',', '.') }}</td>
+                                        <td>{{ $items->count() }} Produk</td>
                                     </tr>
 
                                     <tr class="collapse bg-light" id="{{ $collapseId }}">
-                                        <td colspan="4">
-                                            <strong>Produk Dibeli:</strong>
+                                        <td colspan="5">
+                                            <strong>Produk:</strong>
                                             <ul class="mb-0">
                                                 @foreach($items as $it)
                                                 <li class="mb-2 d-flex align-items-center">
                                                     <img src="{{ $it->produk_gambar }}" width="60" class="me-2 rounded">
-                                                    {{ $it->produk_nama }}
-                                                    ({{ $it->pesanan_jumlah }} x Rp
+                                                    {{ $it->produk_nama }} ({{ $it->pesanan_jumlah }} x Rp
                                                     {{ number_format($it->produk_harga,0,',','.') }})
-                                                    = <strong>Rp
-                                                        {{ number_format($it->pesanan_jumlah * $it->produk_harga,0,',','.') }}</strong>
                                                 </li>
                                                 @endforeach
                                             </ul>
