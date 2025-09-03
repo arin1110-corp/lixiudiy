@@ -87,7 +87,7 @@
                                         style="cursor:pointer;">
                                         <td>#ORD{{ $pembayaranId }}</td>
                                         <td>{{ $pay->pembayaran_tanggal }}</td>
-                                        <td>{{ $pay->pembayaran_metode == '1' ? 'Transfer Bank' : ($pay->pembayaran_metode == '2' ? 'QRIS/E-Wallet' : 'COD') }}
+                                        <td>{{ $pay->pembayaran_metode == '1' ? 'Transfer Bank' : ($pay->pembayaran_metode == '2' ? 'E-Wallet' : 'COD') }}
                                         </td>
                                         <td>{{ $kurir->kurir_nama }}</td>
                                         <td>

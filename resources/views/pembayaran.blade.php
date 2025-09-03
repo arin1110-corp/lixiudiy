@@ -9,37 +9,37 @@
     <link rel="stylesheet" href="{{ asset('css/home.css') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body {
-            background-color: #f8f9fa;
-        }
+    body {
+        background-color: #f8f9fa;
+    }
 
-        .card {
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        }
+    .card {
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
 
-        .card-header {
-            background: #ffffff;
-            font-weight: bold;
-            font-size: 1.1rem;
-            border-bottom: 1px solid #eee;
-        }
+    .card-header {
+        background: #ffffff;
+        font-weight: bold;
+        font-size: 1.1rem;
+        border-bottom: 1px solid #eee;
+    }
 
-        h3 {
-            font-weight: 700;
-        }
+    h3 {
+        font-weight: 700;
+    }
 
-        .btn-success {
-            border-radius: 10px;
-            padding: 12px 30px;
-            font-size: 1.1rem;
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-            transition: 0.3s;
-        }
+    .btn-success {
+        border-radius: 10px;
+        padding: 12px 30px;
+        font-size: 1.1rem;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+        transition: 0.3s;
+    }
 
-        .btn-success:hover {
-            transform: translateY(-2px);
-        }
+    .btn-success:hover {
+        transform: translateY(-2px);
+    }
     </style>
 </head>
 
@@ -156,33 +156,34 @@
                         <div class="mt-3">
                             <strong>Nomor Rekening Bank:</strong>
                             <ul>
-                                <li><b>BCA</b> - 1234567890 a.n PT. Contoh Shop</li>
-                                <li><b>Mandiri</b> - 9876543210 a.n PT. Contoh Shop</li>
-                                <li><b>BRI</b> - 555666777 a.n PT. Contoh Shop</li>
+                                <li><b>BCA</b> - 0241016071 a.n Meliesa Setiawan</li>
+                                <li><b>CIMB NIAGA/Octo Pay</b> - 6281331719352 a.n Meliesa Setiawan</li>
                             </ul>
-                        </div>
-                        <div class="mb-3 mt-3">
-                            <label for="bukti" class="form-label">Upload Bukti Transfer (JPG)</label>
-                            <input type="file" class="form-control" name="bukti" id="bukti" accept=".jpg,.jpeg"
-                                required>
-                            <small class="text-muted">File harus JPG.</small>
                         </div>
                     </div>
 
                     <div class="form-check mb-2">
                         <input class="form-check-input" type="radio" name="pembayaran_metode" id="ewallet" value="2">
-                        <label class="form-check-label" for="ewallet">E-Wallet / QRIS</label>
+                        <label class="form-check-label" for="ewallet">E-Wallet</label>
                     </div>
                     <div id="ewalletStep" class="payment-step mt-2" style="display: none;">
                         <!-- detail step qris -->
                         <ol>
-                            <li>Scan QRIS yang ditampilkan di layar.</li>
-                            <li>Pilih aplikasi pembayaran (OVO, Dana, GoPay, ShopeePay, dll).</li>
+                            <li>Pilih aplikasi pembayaran.</li>
+                            <li>Masukkan nomor rekening yang ditampilkan.</li>
                             <li>Pastikan jumlah pembayaran sesuai dengan tagihan.</li>
                             <li>Setelah berhasil, simpan bukti transaksi.</li>
                             <li>Pembayaran otomatis terverifikasi dalam beberapa menit.</li>
                         </ol>
+                        <div class="mt-3">
+                            <strong>Nomor Rekening Bank:</strong>
+                            <ul>
+                                <li><b>OVO</b> - 081331719352 a.n Meliesa Setiawan</li>
+                                <li><b>Dana</b> - 081331719352 a.n Meliesa Setiawan</li>
+                            </ul>
+                        </div>
                     </div>
+
 
                     <div class="form-check">
                         <input class="form-check-input" type="radio" name="pembayaran_metode" id="cod" value="3">
@@ -210,55 +211,55 @@
 
     @include('partials.footer')
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // pastikan angka mentah (tanpa pemisah ribuan) masuk ke JS
-            const subtotal = Number("{{ (float) $subtotal }}");
-            console.log(subtotal);
-            const kurirSelect = document.getElementById("kurir");
-            const ongkirEl = document.getElementById("ongkir");
-            const kurir = document.getElementById("kurir");
-            const kurirInput = document.getElementById("kuririd");
-            const totalEl = document.getElementById("total");
-            const totalBayarInput = document.getElementById("totalBayar");
+    document.addEventListener("DOMContentLoaded", function() {
+        // pastikan angka mentah (tanpa pemisah ribuan) masuk ke JS
+        const subtotal = Number("{{ (float) $subtotal }}");
+        console.log(subtotal);
+        const kurirSelect = document.getElementById("kurir");
+        const ongkirEl = document.getElementById("ongkir");
+        const kurir = document.getElementById("kurir");
+        const kurirInput = document.getElementById("kuririd");
+        const totalEl = document.getElementById("total");
+        const totalBayarInput = document.getElementById("totalBayar");
 
-            const rupiah = (n) => n.toLocaleString("id-ID");
+        const rupiah = (n) => n.toLocaleString("id-ID");
 
-            function updateTotal() {
-                const opt = kurirSelect?.options[kurirSelect.selectedIndex];
-                const ongkir = Number(opt?.dataset.ongkir ?? 0);
-                const total = subtotal + ongkir;
+        function updateTotal() {
+            const opt = kurirSelect?.options[kurirSelect.selectedIndex];
+            const ongkir = Number(opt?.dataset.ongkir ?? 0);
+            const total = subtotal + ongkir;
 
-                ongkirEl.textContent = rupiah(ongkir);
-                totalEl.textContent = rupiah(total);
+            ongkirEl.textContent = rupiah(ongkir);
+            totalEl.textContent = rupiah(total);
 
-                // simpan nilai mentah ke form (biar masuk DB)
-                totalBayarInput.value = total;
-                kurirInput.value = kurir.value;
-            }
+            // simpan nilai mentah ke form (biar masuk DB)
+            totalBayarInput.value = total;
+            kurirInput.value = kurir.value;
+        }
 
-            if (kurirSelect) {
-                // hitung saat halaman pertama kali load
-                updateTotal();
-                // hitung ulang saat kurir diganti
-                kurirSelect.addEventListener("change", updateTotal);
-            }
-        });
+        if (kurirSelect) {
+            // hitung saat halaman pertama kali load
+            updateTotal();
+            // hitung ulang saat kurir diganti
+            kurirSelect.addEventListener("change", updateTotal);
+        }
+    });
     </script>
     <script>
-        // Perbaikan: pakai name="pembayaran_metode"
-        document.querySelectorAll('input[name="pembayaran_metode"]').forEach((radio) => {
-            radio.addEventListener("change", function() {
-                document.querySelectorAll(".payment-step").forEach((step) => step.style.display = "none");
+    // Perbaikan: pakai name="pembayaran_metode"
+    document.querySelectorAll('input[name="pembayaran_metode"]').forEach((radio) => {
+        radio.addEventListener("change", function() {
+            document.querySelectorAll(".payment-step").forEach((step) => step.style.display = "none");
 
-                if (this.value === "1") {
-                    document.getElementById("transferStep").style.display = "block";
-                } else if (this.value === "2") {
-                    document.getElementById("ewalletStep").style.display = "block";
-                } else if (this.value === "3") {
-                    document.getElementById("codStep").style.display = "block";
-                }
-            });
+            if (this.value === "1") {
+                document.getElementById("transferStep").style.display = "block";
+            } else if (this.value === "2") {
+                document.getElementById("ewalletStep").style.display = "block";
+            } else if (this.value === "3") {
+                document.getElementById("codStep").style.display = "block";
+            }
         });
+    });
     </script>\
 </body>
 

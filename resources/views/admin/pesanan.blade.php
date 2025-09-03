@@ -51,6 +51,7 @@
                                     <th>Kode Bayar</th>
                                     <th>Tanggal</th>
                                     <th>Customer</th>
+                                    <th>Metode Pembayaran</th>
                                     <th>Total Bayar</th>
                                     <th>Aksi</th>
                                 </tr>
@@ -62,6 +63,8 @@
                                     <td>{{ \Carbon\Carbon::parse($p->pembayaran_tanggal)->translatedFormat('d F Y') }}
                                     </td>
                                     <td>{{ $p->customer_nama }}</td>
+                                    <td>{{ $p->pembayaran_metode == '1' ? 'Transfer Bank' : ($p->pembayaran_metode == '2' ? 'E-Wallet' : 'COD') }}
+                                    </td>
                                     <td>Rp {{ number_format($p->total_bayar,0,',','.') }}</td>
                                     <td>
                                         @if($p->pembayaran_status == '0')
