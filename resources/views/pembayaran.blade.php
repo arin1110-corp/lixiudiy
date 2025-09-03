@@ -182,10 +182,6 @@
                             <li>Setelah berhasil, simpan bukti transaksi.</li>
                             <li>Pembayaran otomatis terverifikasi dalam beberapa menit.</li>
                         </ol>
-                        <div class="mt-2">
-                            <center><img src="{{ asset('images/qris.jpeg') }}" alt="QRIS" style="max-width:300px;">
-                            </center>
-                        </div>
                     </div>
 
                     <div class="form-check">

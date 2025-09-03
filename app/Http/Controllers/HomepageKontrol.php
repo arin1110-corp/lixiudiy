@@ -274,7 +274,6 @@ class HomepageKontrol extends Controller
             'pembayaran_metode' => 'required|string',
             'kurir' => 'required',
             'alamat' => 'required',
-            'bukti' => 'required_if:pembayaran_metode,1|file|mimes:jpg,jpeg|max:2048',
         ]);
 
 
@@ -301,11 +300,6 @@ class HomepageKontrol extends Controller
         ModelPesanan::whereIn('pesanan_id', $pesananid)
             ->update(['pesanan_status' => '1']);
 
-        // Simpan file bukti
-        if ($request->hasFile('bukti') && $request->file('bukti')->isValid()) {
-            $filename = 'BYR' . $pembayaran->pembayaran_id . '.jpg';
-            $request->file('bukti')->move(public_path('bukti'), $filename);
-        }
 
         return redirect()->route('akun.customer')->with('success', 'Pembayaran berhasil dicatat!');
     }

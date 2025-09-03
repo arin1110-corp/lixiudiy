@@ -65,10 +65,7 @@
                                     <td>Rp {{ number_format($p->total_bayar,0,',','.') }}</td>
                                     <td>
                                         @if($p->pembayaran_status == '0')
-                                        <button class="btn btn-sm btn-warning btnBukti"
-                                            data-id="{{ $p->pembayaran_id }}">
-                                            Lihat Bukti
-                                        </button>
+
                                         <button class="btn btn-sm btn-success btnVerif"
                                             data-id="{{ $p->pembayaran_id }}">
                                             Verifikasi
