@@ -40,7 +40,7 @@
                 {{-- Tabel Data Bidang --}}
                 <div class="card">
                     <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
-                        <span>Data Produk</span>
+                        <span>Data Customer</span>
 
                     </div>
                     <div class="card-body">
