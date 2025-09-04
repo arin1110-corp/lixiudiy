@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use Google\Service\CloudControlsPartnerService\Customer;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -15,9 +16,16 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $this->call([
+            AdminSeeder::class,
+            KeranjangSeed::class,
+            PengirimanSeed::class,
+            PesananSeed::class,
+            KurirSeeder::class,
+            CustomerSeeder::class,
+            LaporanSeed::class,
+            PembayaranSeed::class,
+            // tambahkan semua seeder lain di sini
         ]);
     }
 }

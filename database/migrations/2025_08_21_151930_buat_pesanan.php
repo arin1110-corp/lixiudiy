@@ -20,7 +20,7 @@ return new class extends Migration
             $table->date('pesanan_tanggal');
             $table->integer('pesanan_jumlah');
             $table->decimal('pesanan_total_harga', 10, 2);
-            $table->string('pesanan_status')->default('pending'); // Default status is 'pending'
+            $table->string('pesanan_status')->default('1'); // Default status is 'pending'
 
         });
     }

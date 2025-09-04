@@ -40,7 +40,7 @@
                 {{-- Tabel Data Bidang --}}
                 <div class="card">
                     <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
-                        <span>Data Produk</span>
+                        <span>Data Rekomendasi Produk</span>
                         <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalTambah">
                             <i class="bi bi-plus-lg"></i> Tambah Data
                         </button>
@@ -239,47 +239,47 @@
     <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 
     <script>
-    $(document).ready(function() {
-        // Init DataTable
-        $('#tabelBidang').DataTable({
-            responsive: true,
-            language: {
-                url: "//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json"
-            }
+        $(document).ready(function() {
+            // Init DataTable
+            $('#tabelBidang').DataTable({
+                responsive: true,
+                language: {
+                    url: "//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json"
+                }
+            });
+
+            // Edit Button
+            $('.btnEdit').click(function() {
+                let id = $(this).data('id');
+                let nama = $(this).data('nama');
+                let produk = $(this).data('produk');
+                let status = $(this).data('status');
+                let tanggal = $(this).data('tanggal');
+                let ket = $(this).data('ket');
+
+                $('#formEdit').attr('action', '/admin/rekomendasi/update/' + id);
+                $('#edit_nama').val(nama);
+                $('#edit_produk').val(produk);
+                $('#edit_status').val(status);
+                $('#edit_tanggalmasuk').val(tanggal);
+                $('#edit_ket').val(ket);
+
+                let modalEdit = new bootstrap.Modal(document.getElementById('modalEdit'));
+                modalEdit.show();
+            });
+
+            // Hapus Button
+            $('.btnHapus').click(function() {
+                let id = $(this).data('id');
+                let nama = $(this).data('nama');
+
+                $('#formHapus').attr('action', '/admin/rekomendasi/delete/' + id);
+                $('#hapus_nama').text(nama);
+
+                let modalHapus = new bootstrap.Modal(document.getElementById('modalHapus'));
+                modalHapus.show();
+            });
         });
-
-        // Edit Button
-        $('.btnEdit').click(function() {
-            let id = $(this).data('id');
-            let nama = $(this).data('nama');
-            let produk = $(this).data('produk');
-            let status = $(this).data('status');
-            let tanggal = $(this).data('tanggal');
-            let ket = $(this).data('ket');
-
-            $('#formEdit').attr('action', '/admin/rekomendasi/update/' + id);
-            $('#edit_nama').val(nama);
-            $('#edit_produk').val(produk);
-            $('#edit_status').val(status);
-            $('#edit_tanggalmasuk').val(tanggal);
-            $('#edit_ket').val(ket);
-
-            let modalEdit = new bootstrap.Modal(document.getElementById('modalEdit'));
-            modalEdit.show();
-        });
-
-        // Hapus Button
-        $('.btnHapus').click(function() {
-            let id = $(this).data('id');
-            let nama = $(this).data('nama');
-
-            $('#formHapus').attr('action', '/admin/rekomendasi/delete/' + id);
-            $('#hapus_nama').text(nama);
-
-            let modalHapus = new bootstrap.Modal(document.getElementById('modalHapus'));
-            modalHapus.show();
-        });
-    });
     </script>
 
 </body>

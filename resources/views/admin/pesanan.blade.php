@@ -6,19 +6,27 @@
 
     {{-- DataTables CSS --}}
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
+
+    <style>
+    td.details-control {
+        background: url('https://cdn.datatables.net/1.13.7/images/details_open.png') no-repeat center center;
+        cursor: pointer;
+    }
+
+    tr.shown td.details-control {
+        background: url('https://cdn.datatables.net/1.13.7/images/details_close.png') no-repeat center center;
+    }
+    </style>
 </head>
 
 <body>
-
     <div class="container-fluid">
         <div class="row">
-            {{-- Sidebar --}}
             @include('admin.partials.sidebaradmin')
 
-            {{-- Konten Utama --}}
             <main class="col-md-10 ms-sm-auto p-4">
 
-                {{-- Header --}}
                 <div class="navbar-header mb-4 d-flex justify-content-between align-items-center">
                     <h2>Dashboard</h2>
                     <div class="d-flex align-items-center">
@@ -37,17 +45,15 @@
                     </div>
                 </div>
 
-
-                {{-- Tabel Data Bidang --}}
                 <div class="card">
-                    <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
-                        <span>Data Pesanan</span>
-
-                    </div>
+                    <div class="card-header bg-white fw-bold">Data Pesanan</div>
                     <div class="card-body">
-                        <table class="table table-bordered">
-                            <thead>
+                        <table id="tabelBidang"
+                            class="table table-bordered table-striped table-hover dt-responsive nowrap"
+                            style="width:100%">
+                            <thead class="table-dark">
                                 <tr>
+                                    <th></th> {{-- Expand button --}}
                                     <th>Kode Bayar</th>
                                     <th>Tanggal</th>
                                     <th>Customer</th>
@@ -58,7 +64,8 @@
                             </thead>
                             <tbody>
                                 @foreach($pembayaran as $p)
-                                <tr class="table-primary">
+                                <tr>
+                                    <td class="details-control"></td>
                                     <td>BYR{{ $p->pembayaran_id }}</td>
                                     <td>{{ \Carbon\Carbon::parse($p->pembayaran_tanggal)->translatedFormat('d F Y') }}
                                     </td>
@@ -68,199 +75,91 @@
                                     <td>Rp {{ number_format($p->total_bayar,0,',','.') }}</td>
                                     <td>
                                         @if($p->pembayaran_status == '0')
-
                                         <button class="btn btn-sm btn-success btnVerif"
-                                            data-id="{{ $p->pembayaran_id }}">
-                                            Verifikasi
-                                        </button>
-                                        @elseif($p->pembayaran_status == '1')
-                                        <button class="btn btn-sm btn-success">
-                                            <i class="fa fa-check">Sudah Verifikasi</i>
-                                        </button>
+                                            data-id="{{ $p->pembayaran_id }}">Verifikasi</button>
+                                        @else
+                                        <button class="btn btn-sm btn-success"><i class="fa fa-check"></i> Sudah
+                                            Verifikasi</button>
                                         @endif
                                     </td>
                                 </tr>
-
-                                @foreach($p->pesanan as $item)
-                                <tr>
-                                    <td></td>
-                                    <td colspan="2">{{ $item->produk_nama }}</td>
-                                    <td>{{ $item->pesanan_jumlah }} x Rp
-                                        {{ number_format($item->produk_harga,0,',','.') }}
-                                    </td>
-                                    <td>Rp {{ number_format($item->total,0,',','.') }}</td>
-                                </tr>
-                                @endforeach
                                 @endforeach
                             </tbody>
                         </table>
-
-                        <!-- Modal Verifikasi Pembayaran-->
-                        <div class="modal fade" id="verifModal" tabindex="-1" aria-labelledby="verifModalLabel"
-                            aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="verifModalLabel">Verifikasi Pembayaran</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                            aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <p>Apakah Anda yakin ingin memverifikasi pembayaran ini?</p>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary"
-                                            data-bs-dismiss="modal">Batal</button>
-                                        <form action="" method="POST" id="verifForm">
-                                            @csrf
-                                            @method('PUT')
-                                            <button type="submit" class="btn btn-primary">Ya, Verifikasi</button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Modal Bukti Pembayaran -->
-                        <div class="modal fade" id="buktiModal" tabindex="-1" aria-labelledby="buktiModalLabel"
-                            aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered modal-lg">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="buktiModalLabel">Bukti Pembayaran</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                            aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body text-center">
-                                        <img id="buktiImage" src="" class="img-fluid rounded shadow"
-                                            alt="Bukti pembayaran tidak tersedia">
-                                        <div id="buktiEmpty" class="alert alert-warning mt-3 d-none">
-                                            Bukti pembayaran belum tersedia untuk pesanan ini.
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
-                {{-- Footer --}}
                 @include('admin.partials.footeradmin')
             </main>
         </div>
     </div>
 
-
-
-    {{-- jQuery harus duluan --}}
+    {{-- JS --}}
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-
-    {{-- Bootstrap JS --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    {{-- DataTables --}}
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
 
     <script>
-        $(document).ready(function() {
-            // Init DataTable
-            $('#tabelBidang').DataTable({
-                responsive: true,
-                language: {
-                    url: "//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json"
-                }
-            });
-
-            // Edit Button
-            $('.btnEdit').click(function() {
-                let id = $(this).data('id');
-                let nama = $(this).data('nama');
-                let produk = $(this).data('produk');
-                let status = $(this).data('status');
-                let tanggal = $(this).data('tanggal');
-                let ket = $(this).data('ket');
-
-                $('#formEdit').attr('action', '/admin/rekomendasi/update/' + id);
-                $('#edit_nama').val(nama);
-                $('#edit_produk').val(produk);
-                $('#edit_status').val(status);
-                $('#edit_tanggalmasuk').val(tanggal);
-                $('#edit_ket').val(ket);
-
-                let modalEdit = new bootstrap.Modal(document.getElementById('modalEdit'));
-                modalEdit.show();
-            });
-
-            // Hapus Button
-            $('.btnHapus').click(function() {
-                let id = $(this).data('id');
-                let nama = $(this).data('nama');
-
-                $('#formHapus').attr('action', '/admin/rekomendasi/delete/' + id);
-                $('#hapus_nama').text(nama);
-
-                let modalHapus = new bootstrap.Modal(document.getElementById('modalHapus'));
-                modalHapus.show();
-            });
+    // Format child row untuk rincian pesanan
+    function formatPesanan(pembayaran) {
+        let html = '<table class="table table-sm table-bordered mb-0">';
+        html +=
+            '<thead class="table-secondary"><tr><th>Produk</th><th>Jumlah</th><th>Harga</th><th>Total</th></tr></thead><tbody>';
+        pembayaran.pesanan.forEach(item => {
+            html += '<tr>';
+            html += '<td>' + item.produk_nama + '</td>';
+            html += '<td>' + item.pesanan_jumlah + '</td>';
+            html += '<td>Rp ' + Number(item.produk_harga).toLocaleString('id-ID') + '</td>';
+            html += '<td>Rp ' + Number(item.total).toLocaleString('id-ID') + '</td>';
+            html += '</tr>';
         });
-    </script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const modal = new bootstrap.Modal(document.getElementById('buktiModal'));
-            const buktiImage = document.getElementById('buktiImage');
-            const buktiEmpty = document.getElementById('buktiEmpty');
+        html += '</tbody></table>';
+        return html;
+    }
 
-            document.querySelectorAll('.btnBukti').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    let id = this.getAttribute('data-id');
-
-                    // Path file bukti (misal: public/bukti/BYR1.jpg)
-                    let url = `/bukti/BYR${id}.jpg`;
-
-                    // Coba load image
-                    fetch(url, {
-                            method: 'HEAD'
-                        })
-                        .then(res => {
-                            if (res.ok) {
-                                buktiImage.src = url;
-                                buktiImage.classList.remove("d-none");
-                                buktiEmpty.classList.add("d-none");
-                            } else {
-                                buktiImage.classList.add("d-none");
-                                buktiEmpty.classList.remove("d-none");
-                            }
-                        })
-                        .catch(() => {
-                            buktiImage.classList.add("d-none");
-                            buktiEmpty.classList.remove("d-none");
-                        });
-
-                    modal.show();
-                });
-            });
+    $(document).ready(function() {
+        var table = $('#tabelBidang').DataTable({
+            responsive: true,
+            pageLength: 10,
+            columnDefs: [{
+                orderable: false,
+                targets: [0, 6]
+            }],
+            language: {
+                url: "//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json"
+            }
         });
-    </script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const verifModal = new bootstrap.Modal(document.getElementById('verifModal'));
-            const verifForm = document.getElementById('verifForm');
 
-            document.querySelectorAll('.btnVerif').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    let id = this.getAttribute('data-id');
+        // Expand/Collapse row
+        var pembayaranData = @json($pembayaran);
+        $('#tabelBidang tbody').on('click', 'td.details-control', function() {
+            var tr = $(this).closest('tr');
+            var row = table.row(tr);
+            var id = tr.find('td:eq(1)').text().replace('BYR', '');
+            var data = pembayaranData.find(p => p.pembayaran_id == id);
 
-                    // set action form
-                    verifForm.setAttribute('action', `/admin/pembayaran/verifikasi/${id}`);
-
-                    // show modal
-                    verifModal.show();
-                });
-            });
+            if (row.child.isShown()) {
+                row.child.hide();
+                tr.removeClass('shown');
+            } else {
+                row.child(formatPesanan(data)).show();
+                tr.addClass('shown');
+            }
         });
-    </script>
 
+        // Verifikasi button
+        const verifModal = new bootstrap.Modal(document.getElementById('verifModal'));
+        const verifForm = document.getElementById('verifForm');
+        $('.btnVerif').click(function() {
+            let id = $(this).data('id');
+            verifForm.setAttribute('action', `/admin/pembayaran/verifikasi/${id}`);
+            verifModal.show();
+        });
+    });
+    </script>
 </body>
 
 </html>

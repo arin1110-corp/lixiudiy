@@ -6,6 +6,12 @@
 
     {{-- DataTables CSS --}}
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
+    <style type="text/css">
+        a {
+            text-decoration: none;
+            color: black;
+        }
+    </style>
 </head>
 
 <body>
@@ -41,154 +47,58 @@
                 <div class="row mb-4">
                     <div class="col-md-4">
                         <div class="card text-center">
-                            <div class="card-body">
-                                <h5>Total Customer</h5>
-                                <p class="display-6 text-warning">{{ @$totalCust }}</p>
-                            </div>
+                            <a href="{{ route('admin.rekomendasi') }}">
+                                <div class="card-body">
+                                    <h5>Total Rekomendasi Produk</h5>
+                                    <p class="display-6 text-warning">{{ @$totalRekomendasi }}</p>
+                                </div>
+                        </div>
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-center">
+                            <a href="{{ route('admin.produk') }}">
+                                <div class="card-body">
+                                    <h5>Total Produk</h5>
+                                    <p class="display-6 text-success">{{ @$totalproduk }}</p>
+                                </div>
+                            </a>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="card text-center">
-                            <div class="card-body">
-                                <h5>Total Produk</h5>
-                                <p class="display-6 text-success">{{ @$totalproduk }}</p>
-                            </div>
+                            <a href="{{ route('admin.kategori') }}">
+                                <div class="card-body">
+                                    <h5>Total Kategori</h5>
+                                    <p class="display-6 text-primary">{{ @$totalKategori }}</p>
+                                </div>
+                            </a>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                </div>{{-- Statistik --}}
+                <div class="row mb-6">
+                    <div class="col-md-6">
                         <div class="card text-center">
-                            <div class="card-body">
-                                <h5>Total Transaksi</h5>
-                                <p class="display-6 text-primary">{{ @$totaltrx }}</p>
-                            </div>
+                            <a href="{{ route('admin.customer') }}">
+                                <div class="card-body">
+                                    <h5>Total Customer</h5>
+                                    <p class="display-6 text-warning">{{ @$totalCust }}</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card text-center">
+                            <a href="{{ route('admin.pesanan') }}">
+                                <div class="card-body">
+                                    <h5>Total Transaksi</h5>
+                                    <p class="display-6 text-success">{{ @$totalPesanan }}</p>
+                                </div>
+                            </a>
                         </div>
                     </div>
                 </div>
 
-                {{-- Tabs --}}
-                <ul class="nav nav-tabs mb-3" id="dataTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all"
-                            type="button" role="tab" aria-controls="all" aria-selected="true">Data Transaksi</button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="pns-tab" data-bs-toggle="tab" data-bs-target="#pns" type="button"
-                            role="tab" aria-controls="pns" aria-selected="false">Data Pembayaran</button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="pppk-tab" data-bs-toggle="tab" data-bs-target="#pppk" type="button"
-                            role="tab" aria-controls="pppk" aria-selected="false">Data Pengiriman</button>
-                    </li>
-                </ul>
-
-                <div class="tab-content" id="dataTabsContent">
-                    {{-- Tab Transaksi --}}
-                    <div class="tab-pane fade show active" id="all" role="tabpanel" aria-labelledby="all-tab">
-                        <table id="tableAll" class="table table-striped table-bordered w-100">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>NIP</th>
-                                    <th>Nama</th>
-                                    <th>Status</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($datapesanan as $no => $user)
-                                <tr>
-                                    <td>{{ $no + 1 }}</td>
-                                    <td>{{ $user->user_nip }}</td>
-                                    <td>{{ $user->user_nama }}</td>
-                                    <td>
-                                        @if($user->user_jeniskerja == '1')
-                                        <span class="badge bg-success">PNS</span>
-                                        @elseif ($user->user_jeniskerja == '2')
-                                        <span class="badge bg-primary">PPPK</span>
-                                        @else
-                                        <span class="badge bg-secondary">Tidak Aktif</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-sm btn-warning">Edit</button>
-                                        <button class="btn btn-sm btn-danger">Hapus</button>
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-
-                    {{-- Tab Pengiriman --}}
-                    <div class="tab-pane fade" id="pns" role="tabpanel" aria-labelledby="pns-tab">
-                        <table id="tablePns" class="table table-striped table-bordered w-100">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>NIP</th>
-                                    <th>Nama</th>
-                                    <th>Status</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($datapengiriman as $no => $user)
-                                <tr>
-                                    <td>{{ $no + 1 }}</td>
-                                    <td>{{ $user->user_nip }}</td>
-                                    <td>{{ $user->user_nama }}</td>
-                                    <td>
-                                        @if($user->user_status == '1')
-                                        <span class="badge bg-success">Aktif</span>
-                                        @else
-                                        <span class="badge bg-secondary">Tidak Aktif</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-sm btn-warning">Edit</button>
-                                        <button class="btn btn-sm btn-danger">Hapus</button>
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-
-                    {{-- Tab PPPK --}}
-                    <div class="tab-pane fade" id="pppk" role="tabpanel" aria-labelledby="pppk-tab">
-                        <table id="tablePppk" class="table table-striped table-bordered w-100">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>NIP</th>
-                                    <th>Nama</th>
-                                    <th>Status</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($datapembayaran as $no => $user)
-                                <tr>
-                                    <td>{{ $no + 1 }}</td>
-                                    <td>{{ $user->user_nip }}</td>
-                                    <td>{{ $user->user_nama }}</td>
-                                    <td>
-                                        @if($user->user_status == '1')
-                                        <span class="badge bg-success">Aktif</span>
-                                        @else
-                                        <span class="badge bg-secondary">Tidak Aktif</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-sm btn-warning">Edit</button>
-                                        <button class="btn btn-sm btn-danger">Hapus</button>
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
 
                 {{-- Footer --}}
                 @include('admin.partials.footeradmin')

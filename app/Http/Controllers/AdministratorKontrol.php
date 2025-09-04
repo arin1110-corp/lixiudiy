@@ -70,7 +70,9 @@ class AdministratorKontrol extends Controller
         $customer = ModelCustomer::count();
         $pengiriman = ModelPengiriman::count();
         $pembayaran = ModelPembayaran::count();
-        $pesanan = ModelPesanan::count();
+        $rekomendasi = ModelRekomendasiProduk::count();
+        $kategori = ModelKategori::count();
+        $pesanan = ModelPembayaran::count();
         $keranjang = ModelKeranjang::count();
         $datapesanan = ModelPesanan::all();
         $totaltrx = ModelLaporanPenjualan::sum('laporan_total_pendapatan');
@@ -87,6 +89,8 @@ class AdministratorKontrol extends Controller
             'totalPesanan' => $pesanan,
             'totaltrx' => $totaltrx,
             'totalKeranjang' => $keranjang,
+            'totalKategori' => $kategori,
+            'totalRekomendasi' => $rekomendasi
         ]);
     }
 
@@ -515,5 +519,45 @@ class AdministratorKontrol extends Controller
         $pengiriman->save();
 
         return redirect()->back()->with('success', 'Nomor resi berhasil diperbarui!');
+    }
+    //Akhir Kelola Data Pengiriman
+
+    // Kelola Data Laporan
+    public function laporan(Request $request)
+    {
+        $adminId = session('admin_id');
+        if (!$adminId) {
+            return redirect()->route('home.page')
+                ->with('error', 'Hanya Untuk Admin');
+        }
+
+        // Ambil data laporan dengan pagination 10 per halaman
+        $laporans = DB::table('lixiudiy_laporan_penjualan')
+            ->orderBy('laporan_tanggal', 'desc')
+            ->paginate(10);
+
+        // Ambil data detail pesanan untuk tiap laporan
+        foreach ($laporans as $lap) {
+            $pesanan = DB::table('lixiudiy_pesanan')
+                ->join('lixiudiy_customer', 'lixiudiy_pesanan.pesanan_customer', '=', 'lixiudiy_customer.customer_id')
+                ->select(
+                    'lixiudiy_pesanan.pesanan_id',
+                    'lixiudiy_pesanan.pesanan_produk',
+                    'lixiudiy_pesanan.pesanan_jumlah',
+                    'lixiudiy_pesanan.pesanan_total_harga',
+                    'lixiudiy_customer.customer_nama'
+                )
+                ->whereBetween('lixiudiy_pesanan.pesanan_tanggal', [$lap->laporan_periode_mulai, $lap->laporan_periode_selesai])
+                ->get();
+
+            $lap->pesanan = $pesanan;
+
+            // Hitung total produk unik dan total pesanan
+            $lap->total_produk = $pesanan->pluck('pesanan_produk')->unique()->count();
+            $lap->total_pesanan = $pesanan->count();
+        }
+
+        // Kirim variabel ke view setelah data lengkap
+        return view('admin.laporan', compact('laporans'));
     }
 }
