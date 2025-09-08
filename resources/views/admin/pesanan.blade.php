@@ -9,14 +9,14 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
 
     <style>
-    td.details-control {
-        background: url('https://cdn.datatables.net/1.13.7/images/details_open.png') no-repeat center center;
-        cursor: pointer;
-    }
+        td.details-control {
+            background: url('https://cdn.datatables.net/1.13.7/images/details_open.png') no-repeat center center;
+            cursor: pointer;
+        }
 
-    tr.shown td.details-control {
-        background: url('https://cdn.datatables.net/1.13.7/images/details_close.png') no-repeat center center;
-    }
+        tr.shown td.details-control {
+            background: url('https://cdn.datatables.net/1.13.7/images/details_close.png') no-repeat center center;
+        }
     </style>
 </head>
 
@@ -89,6 +89,25 @@
                     </div>
                 </div>
 
+                <div class="modal fade" id="verifModal" tabindex="-1" aria-labelledby="verifModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="verifModalLabel">Verifikasi Pembayaran</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="verifForm" method="POST">
+                                    @csrf
+                                    <button type="submit" class="btn btn-primary">Verifikasi</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 @include('admin.partials.footeradmin')
             </main>
         </div>
@@ -103,62 +122,62 @@
     <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
 
     <script>
-    // Format child row untuk rincian pesanan
-    function formatPesanan(pembayaran) {
-        let html = '<table class="table table-sm table-bordered mb-0">';
-        html +=
-            '<thead class="table-secondary"><tr><th>Produk</th><th>Jumlah</th><th>Harga</th><th>Total</th></tr></thead><tbody>';
-        pembayaran.pesanan.forEach(item => {
-            html += '<tr>';
-            html += '<td>' + item.produk_nama + '</td>';
-            html += '<td>' + item.pesanan_jumlah + '</td>';
-            html += '<td>Rp ' + Number(item.produk_harga).toLocaleString('id-ID') + '</td>';
-            html += '<td>Rp ' + Number(item.total).toLocaleString('id-ID') + '</td>';
-            html += '</tr>';
-        });
-        html += '</tbody></table>';
-        return html;
-    }
+        // Format child row untuk rincian pesanan
+        function formatPesanan(pembayaran) {
+            let html = '<table class="table table-sm table-bordered mb-0">';
+            html +=
+                '<thead class="table-secondary"><tr><th>Produk</th><th>Jumlah</th><th>Harga</th><th>Total</th></tr></thead><tbody>';
+            pembayaran.pesanan.forEach(item => {
+                html += '<tr>';
+                html += '<td>' + item.produk_nama + '</td>';
+                html += '<td>' + item.pesanan_jumlah + '</td>';
+                html += '<td>Rp ' + Number(item.produk_harga).toLocaleString('id-ID') + '</td>';
+                html += '<td>Rp ' + Number(item.total).toLocaleString('id-ID') + '</td>';
+                html += '</tr>';
+            });
+            html += '</tbody></table>';
+            return html;
+        }
 
-    $(document).ready(function() {
-        var table = $('#tabelBidang').DataTable({
-            responsive: true,
-            pageLength: 10,
-            columnDefs: [{
-                orderable: false,
-                targets: [0, 6]
-            }],
-            language: {
-                url: "//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json"
-            }
-        });
+        $(document).ready(function() {
+            var table = $('#tabelBidang').DataTable({
+                responsive: true,
+                pageLength: 10,
+                columnDefs: [{
+                    orderable: false,
+                    targets: [0, 6]
+                }],
+                language: {
+                    url: "//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json"
+                }
+            });
 
-        // Expand/Collapse row
-        var pembayaranData = @json($pembayaran);
-        $('#tabelBidang tbody').on('click', 'td.details-control', function() {
-            var tr = $(this).closest('tr');
-            var row = table.row(tr);
-            var id = tr.find('td:eq(1)').text().replace('BYR', '');
-            var data = pembayaranData.find(p => p.pembayaran_id == id);
+            // Expand/Collapse row
+            var pembayaranData = @json($pembayaran);
+            $('#tabelBidang tbody').on('click', 'td.details-control', function() {
+                var tr = $(this).closest('tr');
+                var row = table.row(tr);
+                var id = tr.find('td:eq(1)').text().replace('BYR', '');
+                var data = pembayaranData.find(p => p.pembayaran_id == id);
 
-            if (row.child.isShown()) {
-                row.child.hide();
-                tr.removeClass('shown');
-            } else {
-                row.child(formatPesanan(data)).show();
-                tr.addClass('shown');
-            }
-        });
+                if (row.child.isShown()) {
+                    row.child.hide();
+                    tr.removeClass('shown');
+                } else {
+                    row.child(formatPesanan(data)).show();
+                    tr.addClass('shown');
+                }
+            });
 
-        // Verifikasi button
-        const verifModal = new bootstrap.Modal(document.getElementById('verifModal'));
-        const verifForm = document.getElementById('verifForm');
-        $('.btnVerif').click(function() {
-            let id = $(this).data('id');
-            verifForm.setAttribute('action', `/admin/pembayaran/verifikasi/${id}`);
-            verifModal.show();
+            // Verifikasi button
+            const verifModal = new bootstrap.Modal(document.getElementById('verifModal'));
+            const verifForm = document.getElementById('verifForm');
+            $('.btnVerif').click(function() {
+                let id = $(this).data('id');
+                verifForm.setAttribute('action', `/admin/pembayaran/verifikasi/${id}`);
+                verifModal.show();
+            });
         });
-    });
     </script>
 </body>
 
