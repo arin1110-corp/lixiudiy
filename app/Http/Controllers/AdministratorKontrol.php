@@ -14,6 +14,7 @@ use App\Models\ModelLaporanPenjualan;
 use App\Models\ModelRekomendasiProduk;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
 
 
 
@@ -534,7 +535,7 @@ class AdministratorKontrol extends Controller
         // Ambil data laporan dengan pagination 10 per halaman
         $laporans = DB::table('lixiudiy_laporan_penjualan')
             ->orderBy('laporan_tanggal', 'desc')
-            ->paginate(10);
+            ->get();
 
         // Ambil data detail pesanan untuk tiap laporan
         foreach ($laporans as $lap) {
@@ -559,5 +560,61 @@ class AdministratorKontrol extends Controller
 
         // Kirim variabel ke view setelah data lengkap
         return view('admin.laporan', compact('laporans'));
+    }
+    public function laporanProses(Request $request)
+    {
+        $adminId = session('admin_id');
+        if (!$adminId) {
+            return redirect()->route('home.page')
+                ->with('error', 'Hanya Untuk Admin');
+        }
+        $request->validate([
+            'bulan' => 'required|integer|min:1|max:12',
+            'tahun' => 'required|integer|min:2000|max:2100',
+        ]);
+
+        $bulan = $request->bulan;
+        $tahun = $request->tahun;
+
+        // tanggal periode
+        $periode_mulai = Carbon::create($tahun, $bulan, 1)->startOfDay();
+        $periode_selesai = Carbon::create($tahun, $bulan, 1)->endOfMonth()->endOfDay();
+
+        // ambil pesanan dari periode
+        $pesanan = ModelPesanan::whereBetween('pesanan_tanggal', [$periode_mulai, $periode_selesai])->get();
+
+        $totalProduk = $pesanan->sum('pesanan_jumlah'); // sesuaikan field
+        $totalPesanan = $pesanan->count();
+        $totalPendapatan = $pesanan->sum('pesanan_total_harga'); // sesuaikan field
+
+        // cek laporan sudah ada atau belum
+        $laporan = ModelLaporanPenjualan::where('laporan_periode_mulai', $periode_mulai->toDateString())
+            ->where('laporan_periode_selesai', $periode_selesai->toDateString())
+            ->first();
+
+        if ($laporan) {
+            // update
+            $laporan->update([
+                'laporan_tanggal' => Carbon::now(),
+                'laporan_total_produk' => $totalProduk,
+                'laporan_total_pesanan' => $totalPesanan,
+                'laporan_total_pendapatan' => $totalPendapatan,
+                'laporan_keterangan' => "Update laporan bulan " . $periode_mulai->translatedFormat('F Y'),
+            ]);
+        } else {
+            // insert
+            ModelLaporanPenjualan::create([
+                'laporan_tanggal' => Carbon::now(),
+                'laporan_total_produk' => $totalProduk,
+                'laporan_total_pesanan' => $totalPesanan,
+                'laporan_total_pendapatan' => $totalPendapatan,
+                'laporan_periode_mulai' => $periode_mulai,
+                'laporan_periode_selesai' => $periode_selesai,
+                'laporan_keterangan' => "Laporan bulan " . $periode_mulai->translatedFormat('F Y'),
+                'laporan_status' => 'active',
+            ]);
+        }
+
+        return redirect()->route('admin.laporan')->with('success', 'Laporan berhasil diproses!');
     }
 }

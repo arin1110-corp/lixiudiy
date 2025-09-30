@@ -6,10 +6,19 @@
 
     {{-- DataTables CSS --}}
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
+
+    {{-- Chart.js --}}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* kecil saja agar tabel tidak mepet */
+        .card-body {
+            overflow-x: auto;
+        }
+    </style>
 </head>
 
 <body>
-
     <div class="container-fluid">
         <div class="row">
             {{-- Sidebar --}}
@@ -17,7 +26,6 @@
 
             {{-- Konten Utama --}}
             <main class="col-md-10 ms-sm-auto p-4">
-
                 {{-- Header --}}
                 <div class="navbar-header mb-4 d-flex justify-content-between align-items-center">
                     <h2>Dashboard</h2>
@@ -37,16 +45,35 @@
                     </div>
                 </div>
 
-
-                {{-- Tabel Data Bidang --}}
-                <div class="card">
+                {{-- Card Tabel --}}
+                <div class="card mb-4">
                     <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
-                        <span>Data Pesanan</span>
-
+                        <span>Data Laporan Penjualan</span>
                     </div>
+
                     <div class="card-body">
-                        <table class="table table-bordered">
-                            <thead>
+                        {{-- Filter (opsional) --}}
+                        <form action="{{ route('admin.laporan.proses') }}" method="POST" class="d-flex gap-2 mb-3">
+                            @csrf
+                            <select name="bulan" class="form-select w-auto" required>
+                                @for ($m = 1; $m <= 12; $m++) <option value="{{ $m }}"
+                                    {{ $m == now()->subMonth()->month ? 'selected' : '' }}>
+                                    {{ \Carbon\Carbon::create()->month($m)->translatedFormat('F') }}
+                                    </option>
+                                    @endfor
+                            </select>
+
+                            <select name="tahun" class="form-select w-auto" required>
+                                @for ($y = now()->year; $y >= now()->year - 5; $y--)
+                                <option value="{{ $y }}">{{ $y }}</option>
+                                @endfor
+                            </select>
+
+                            <button type="submit" class="btn btn-primary">Proses Laporan</button>
+                        </form>
+
+                        <table class="table table-bordered" id="tabelBidang" style="width:100%;">
+                            <thead class="table-light">
                                 <tr>
                                     <th>ID Laporan</th>
                                     <th>Tanggal</th>
@@ -59,11 +86,12 @@
                             </thead>
                             <tbody>
                                 @foreach($laporans as $lap)
-                                <tr class="table-primary">
+                                <tr>
                                     <td>{{ $lap->laporan_id }}</td>
                                     <td>{{ \Carbon\Carbon::parse($lap->laporan_tanggal)->translatedFormat('d F Y') }}
                                     </td>
-                                    <td>{{ \Carbon\Carbon::parse($lap->laporan_periode_mulai)->translatedFormat('d F Y') }}
+                                    <td>
+                                        {{ \Carbon\Carbon::parse($lap->laporan_periode_mulai)->translatedFormat('d F Y') }}
                                         s/d
                                         {{ \Carbon\Carbon::parse($lap->laporan_periode_selesai)->translatedFormat('d F Y') }}
                                     </td>
@@ -76,130 +104,106 @@
                             </tbody>
                         </table>
 
-                        {{-- Pagination --}}
-                        <div class="mt-3">
-                            {{ $laporans->links('pagination::bootstrap-5') }}
-                        </div>
+                        {{-- Jika Anda menggunakan Laravel pagination sebelumnya dan ingin DataTables mengatur client-side pagination,
+                             pastikan controller mengirim semua baris (->get()) bukan paginated; jika tetap pakai paginator,
+                             Anda bisa tampilkan links di bawah (opsional). --}}
+                        {{-- {{-- {{ $laporans->links('pagination::bootstrap-5') }} --}}
+                    </div>
+                </div>
 
+                {{-- Card Grafik --}}
+                <div class="card">
+                    <div class="card-header bg-white fw-bold">Grafik Pendapatan per Periode</div>
+                    <div class="card-body">
+                        <canvas id="grafikPendapatan" height="120"></canvas>
+                    </div>
+                </div>
 
-
-                        {{-- Footer --}}
-                        @include('admin.partials.footeradmin')
+                {{-- Footer --}}
+                @include('admin.partials.footeradmin')
             </main>
         </div>
     </div>
 
-
-
-    {{-- jQuery harus duluan --}}
+    {{-- jQuery duluan --}}
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-
     {{-- Bootstrap JS --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
     {{-- DataTables --}}
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 
+    @php
+    // Pastikan $laporans menjadi koleksi yang bisa di-pluck terlepas dari paginator
+    if ($laporans instanceof \Illuminate\Pagination\AbstractPaginator) {
+    $collection = collect($laporans->items());
+    } else {
+    $collection = collect($laporans);
+    }
+
+    $chartLabels = $collection->pluck('laporan_periode_mulai')->map(function ($d) {
+    return \Carbon\Carbon::parse($d)->translatedFormat('F Y');
+    })->toArray();
+
+    $chartData = $collection->pluck('laporan_total_pendapatan')->map(function ($v) {
+    // pastikan numeric
+    return is_numeric($v) ? (float) $v : 0.0;
+    })->toArray();
+    @endphp
+
     <script>
         $(document).ready(function() {
-            // Init DataTable
+            // Inisialisasi DataTable client-side
             $('#tabelBidang').DataTable({
                 responsive: true,
+                pageLength: 10,
+                lengthMenu: [
+                    [10, 20, 50, 100],
+                    [10, 20, 50, 100]
+                ],
                 language: {
                     url: "//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json"
                 }
             });
-
-            // Edit Button
-            $('.btnEdit').click(function() {
-                let id = $(this).data('id');
-                let nama = $(this).data('nama');
-                let produk = $(this).data('produk');
-                let status = $(this).data('status');
-                let tanggal = $(this).data('tanggal');
-                let ket = $(this).data('ket');
-
-                $('#formEdit').attr('action', '/admin/rekomendasi/update/' + id);
-                $('#edit_nama').val(nama);
-                $('#edit_produk').val(produk);
-                $('#edit_status').val(status);
-                $('#edit_tanggalmasuk').val(tanggal);
-                $('#edit_ket').val(ket);
-
-                let modalEdit = new bootstrap.Modal(document.getElementById('modalEdit'));
-                modalEdit.show();
-            });
-
-            // Hapus Button
-            $('.btnHapus').click(function() {
-                let id = $(this).data('id');
-                let nama = $(this).data('nama');
-
-                $('#formHapus').attr('action', '/admin/rekomendasi/delete/' + id);
-                $('#hapus_nama').text(nama);
-
-                let modalHapus = new bootstrap.Modal(document.getElementById('modalHapus'));
-                modalHapus.show();
-            });
         });
-    </script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const modal = new bootstrap.Modal(document.getElementById('buktiModal'));
-            const buktiImage = document.getElementById('buktiImage');
-            const buktiEmpty = document.getElementById('buktiEmpty');
 
-            document.querySelectorAll('.btnBukti').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    let id = this.getAttribute('data-id');
+        // Data grafik dari PHP (dihasilkan di @php di atas)
+        const labels = @json($chartLabels);
+        const dataPendapatan = @json($chartData);
 
-                    // Path file bukti (misal: public/bukti/BYR1.jpg)
-                    let url = `/bukti/BYR${id}.jpg`;
-
-                    // Coba load image
-                    fetch(url, {
-                            method: 'HEAD'
-                        })
-                        .then(res => {
-                            if (res.ok) {
-                                buktiImage.src = url;
-                                buktiImage.classList.remove("d-none");
-                                buktiEmpty.classList.add("d-none");
-                            } else {
-                                buktiImage.classList.add("d-none");
-                                buktiEmpty.classList.remove("d-none");
+        const ctx = document.getElementById('grafikPendapatan').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Pendapatan (Rp)',
+                    data: dataPendapatan,
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return 'Rp ' + value.toLocaleString('id-ID');
                             }
-                        })
-                        .catch(() => {
-                            buktiImage.classList.add("d-none");
-                            buktiEmpty.classList.remove("d-none");
-                        });
-
-                    modal.show();
-                });
-            });
+                        }
+                    }
+                }
+            }
         });
     </script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const verifModal = new bootstrap.Modal(document.getElementById('verifModal'));
-            const verifForm = document.getElementById('verifForm');
-
-            document.querySelectorAll('.btnVerif').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    let id = this.getAttribute('data-id');
-
-                    // set action form
-                    verifForm.setAttribute('action', `/admin/pembayaran/verifikasi/${id}`);
-
-                    // show modal
-                    verifModal.show();
-                });
-            });
-        });
-    </script>
-
 </body>
 
 </html>
