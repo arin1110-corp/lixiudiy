@@ -100,7 +100,7 @@
 
                             <label class="form-label mt-2">Tahun</label>
                             <select name="tahun" class="form-select w-auto" required>
-                                @for ($y = now()->year; $y >= now()->year - 5; $y--)
+                                @for ($y = now()->year; $y >= now()->year - 2; $y--)
                                     <option value="{{ $y }}" {{ $tahunFilter == $y ? 'selected' : '' }}>
                                         {{ $y }}
                                     </option>
