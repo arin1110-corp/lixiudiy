@@ -146,7 +146,7 @@
                                     return $tLap->between($tanggalMulai, $tanggalSelesai);
                                 })
                                 ->sortByDesc(function ($lap) {
-                                    return strtotime($lap->laporan_tanggal);
+                                    return \Carbon\Carbon::parse($lap->laporan_tanggal)->timestamp; // ✅ urut berdasarkan waktu sebenarnya
                                 })
                                 ->values();
                             }
