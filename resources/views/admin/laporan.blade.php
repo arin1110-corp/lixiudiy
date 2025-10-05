@@ -141,11 +141,14 @@
                                 $tanggalSelesai = \Carbon\Carbon::createFromDate($t, $bSelesai, 1)->endOfMonth();
 
                                 $laporansFiltered = $laporans->filter(function ($lap) use ($tanggalMulai, $tanggalSelesai) {
-                                    // Pastikan laporan_tanggal tidak kosong dan bisa di-parse
-                                    if (empty($lap->laporan_tanggal)) return false;
+                                    if (empty($lap->laporan_periode_mulai)) return false;
                                     $tLap = \Carbon\Carbon::parse($lap->laporan_periode_mulai);
                                     return $tLap->between($tanggalMulai, $tanggalSelesai);
-                                })->values();
+                                })
+                                ->sortByDesc(function ($lap) {
+                                    return \Carbon\Carbon::parse($lap->laporan_tanggal);
+                                })
+                                ->values();
                             }
                         @endphp
 
