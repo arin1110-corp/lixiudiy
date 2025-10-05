@@ -116,7 +116,7 @@
                                     <p class="text-danger fw-bold">Rp
                                         {{ number_format($produkb->produk_harga, 0, ',', '.') }}
                                     </p>
-                                    <a href="/detail-produk" class="btn btn-sm btn-outline-primary">Lihat Detail</a>
+                                    <a href="{{ route('detailproduk', ['id' => $produkb->produk_id]) }}" class="btn btn-sm btn-outline-primary">Lihat Detail</a>
                                 </div>
                             </div>
                         </div>

@@ -30,18 +30,14 @@
                 <div class="navbar-header mb-4 d-flex justify-content-between align-items-center">
                     <h2>Dashboard</h2>
                     <div class="d-flex align-items-center">
-                        <input class="form-control me-3" type="text" placeholder="Cari...">
                         <div class="dropdown">
-                            <a href="#" class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle"
-                                data-bs-toggle="dropdown">
-                                <i class="rounded-circle me-2 bi bi-people"></i>
-                                Admin
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="#">Profil</a></li>
-                                <li><a class="dropdown-item" href="#">Keluar</a></li>
-                            </ul>
-                        </div>
+                                <a
+                                    href="{{ route('logout') }}"
+                                    class="d-flex align-items-center text-dark text-decoration-none">
+                                    <i class="rounded-circle me-2 bi bi-dash-circle-fill"></i>
+                                    Logout
+                                </a>
+                            </div>
                     </div>
                 </div>
 
@@ -64,7 +60,7 @@
                             </select>
 
                             <select name="tahun" class="form-select w-auto" required>
-                                @for ($y = now()->year; $y >= now()->year - 5; $y--)
+                                @for ($y = now()->year; $y >= now()->year - 2; $y--)
                                 <option value="{{ $y }}">{{ $y }}</option>
                                 @endfor
                             </select>

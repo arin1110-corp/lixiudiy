@@ -60,38 +60,74 @@ class AdministratorKontrol extends Controller
         ]);
         return redirect()->route('dashboard');
     }
-    public function index()
+    public function index(Request $request)
     {
-        $adminId = session('admin_id');
-        if (!$adminId) {
-            return redirect()->route('home.page')
-                ->with('error', 'Hanya Untuk Admin');
+        // Ambil tahun yang dipilih, default: tahun sekarang
+        $tahun = $request->get('tahun', date('Y'));
+
+        // === HITUNG TOTAL DATA ===
+        $produk        = ModelProduk::count();
+        $customer      = ModelCustomer::count();
+        $pengiriman    = ModelPengiriman::count();
+        $pembayaran    = ModelPembayaran::count();
+        $rekomendasi   = ModelRekomendasiProduk::count();
+        $kategori      = ModelKategori::count();
+        $pesanan       = ModelPesanan::count();
+        $keranjang     = ModelKeranjang::count();
+        $totaltrx      = ModelLaporanPenjualan::sum('laporan_total_pendapatan');
+
+        // === GRAFIK: Pendapatan per bulan untuk tahun dipilih ===
+        $pendapatanBulanan = ModelLaporanPenjualan::selectRaw('MONTH(laporan_periode_mulai) as bulan, SUM(laporan_total_pendapatan) as total')
+            ->whereYear('laporan_periode_mulai', $tahun)
+            ->groupBy('bulan')
+            ->orderBy('bulan')
+            ->get();
+
+        $namaBulan = [
+            1 => 'Jan',
+            2 => 'Feb',
+            3 => 'Mar',
+            4 => 'Apr',
+            5 => 'Mei',
+            6 => 'Jun',
+            7 => 'Jul',
+            8 => 'Agu',
+            9 => 'Sep',
+            10 => 'Okt',
+            11 => 'Nov',
+            12 => 'Des'
+        ];
+
+        $chartLabels = $pendapatanBulanan->map(fn($row) => $namaBulan[$row->bulan]);
+        $chartData   = $pendapatanBulanan->pluck('total');
+
+        // === Untuk dropdown tahun ===
+        $listTahun = ModelLaporanPenjualan::selectRaw('YEAR(laporan_periode_mulai) as tahun')
+            ->distinct()
+            ->orderBy('tahun', 'desc')
+            ->pluck('tahun');
+
+        if ($request->ajax()) {
+            return response()->json([
+                'labels' => $chartLabels,
+                'data'   => $chartData,
+            ]);
         }
-        $produk = ModelProduk::count();
-        $customer = ModelCustomer::count();
-        $pengiriman = ModelPengiriman::count();
-        $pembayaran = ModelPembayaran::count();
-        $rekomendasi = ModelRekomendasiProduk::count();
-        $kategori = ModelKategori::count();
-        $pesanan = ModelPembayaran::count();
-        $keranjang = ModelKeranjang::count();
-        $datapesanan = ModelPesanan::all();
-        $totaltrx = ModelLaporanPenjualan::sum('laporan_total_pendapatan');
-        $datapengiriman = ModelPengiriman::all();
-        $datapembayaran = ModelPembayaran::all();
+
         return view('admin.dashboard', [
-            'totalproduk' => $produk,
-            'totalCust' => $customer,
-            'datapesanan' => $datapesanan,
-            'datapengiriman' => $datapengiriman,
-            'datapembayaran' => $datapembayaran,
+            'tahun'           => $tahun,
+            'listTahun'       => $listTahun,
+            'chartLabels'     => $chartLabels,
+            'chartData'       => $chartData,
+            'totalproduk'     => $produk,
+            'totalCust'       => $customer,
             'totalPengiriman' => $pengiriman,
             'totalPembayaran' => $pembayaran,
-            'totalPesanan' => $pesanan,
-            'totaltrx' => $totaltrx,
-            'totalKeranjang' => $keranjang,
-            'totalKategori' => $kategori,
-            'totalRekomendasi' => $rekomendasi
+            'totalRekomendasi' => $rekomendasi,
+            'totalKategori'   => $kategori,
+            'totalPesanan'    => $pesanan,
+            'totalKeranjang'  => $keranjang,
+            'totaltrx'        => $totaltrx
         ]);
     }
 
