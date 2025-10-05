@@ -58,6 +58,7 @@ Route::put('/admin/kategori/update/{id}', [AdministratorKontrol::class, 'updateK
 Route::delete('/admin/kategori/delete/{id}', [AdministratorKontrol::class, 'hapusKategori'])->name('admin.kategori.hapus');
 
 Route::get('/admin/customer', [AdministratorKontrol::class, 'customer'])->name('admin.customer');
+Route::get('/admin/laporan/cetak', [AdministratorKontrol::class, 'cetakPDF'])->name('admin.laporan.cetak');
 
 Route::get('/admin/rekomendasi', [AdministratorKontrol::class, 'rekomendasi'])->name('admin.rekomendasi');
 Route::post('/admin/rekomendasi/simpan', [AdministratorKontrol::class, 'simpanRekomendasi'])->name('admin.rekomendasi.simpan');

@@ -15,6 +15,7 @@ use App\Models\ModelRekomendasiProduk;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 
 
@@ -652,5 +653,17 @@ class AdministratorKontrol extends Controller
         }
 
         return redirect()->route('admin.laporan')->with('success', 'Laporan berhasil diproses!');
+    }
+    public function cetakPDF()
+    {
+        // Ambil data laporan
+        $laporans = DB::table('lixiudiy_laporan_penjualan')
+            ->orderBy('laporan_tanggal', 'desc')
+            ->get();
+
+        $pdf = Pdf::loadView('admin.laporanpdf', compact('laporans'))
+            ->setPaper('a4', 'portrait'); // bisa ganti 'landscape' kalau mau lebar
+
+        return $pdf->download('laporan_penjualan_' . Carbon::now()->format('Ymd_His') . '.pdf');
     }
 }

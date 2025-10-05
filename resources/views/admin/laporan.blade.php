@@ -40,7 +40,11 @@
                             </div>
                     </div>
                 </div>
-
+                <div class="d-flex justify-content-end mb-3">
+                    <a href="{{ route('admin.laporan.cetak') }}" target="_blank" class="btn btn-danger">
+                        <i class="bi bi-file-earmark-pdf-fill"></i> Cetak PDF
+                    </a>
+                </div>
                 {{-- Card Tabel --}}
                 <div class="card mb-4">
                     <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
@@ -83,7 +87,7 @@
                             <tbody>
                                 @foreach($laporans as $lap)
                                 <tr>
-                                    <td>{{ $lap->laporan_id }}</td>
+                                    <td>LAP#{{ $lap->laporan_id }}</td>
                                     <td>{{ \Carbon\Carbon::parse($lap->laporan_tanggal)->translatedFormat('d F Y') }}
                                     </td>
                                     <td>
