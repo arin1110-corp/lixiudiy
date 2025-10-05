@@ -69,7 +69,7 @@ Route::get('/admin/pengiriman', [AdministratorKontrol::class, 'pengiriman'])->na
 Route::post('/admin/pengiriman/resi/{id}', [AdministratorKontrol::class, 'pengirimanResi'])->name('pengiriman.resi');
 
 Route::get('/admin/pesanan', [AdministratorKontrol::class, 'pesanan'])->name('admin.pesanan'); // web.php
-Route::put('/admin/pembayaran/verifikasi/{id}', [AdministratorKontrol::class, 'verifikasi'])->name('admin.pembayaran.verifikasi');
+Route::post('/admin/pembayaran/verifikasi/{id}', [AdministratorKontrol::class, 'verifikasi'])->name('admin.pembayaran.verifikasi');
 
 Route::post('/admin/laporan/proses', [AdministratorKontrol::class, 'laporanProses'])->name('admin.laporan.proses');
 

@@ -93,7 +93,7 @@
                                         <td>
                                             @if($p->pembayaran_status == '0')
                                             <button
-                                                class="btn btn-sm btn-success btnVerif"
+                                                class="btn btn-sm btn-warning btnVerif"
                                                 data-id="{{ $p->pembayaran_id }}"
                                             >
                                                 Verifikasi
