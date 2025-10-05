@@ -146,7 +146,7 @@
                                     return $tLap->between($tanggalMulai, $tanggalSelesai);
                                 })
                                 ->sortByDesc(function ($lap) {
-                                    return \Carbon\Carbon::parse($lap->laporan_tanggal);
+                                    return strtotime($lap->laporan_tanggal);
                                 })
                                 ->values();
                             }
@@ -207,7 +207,7 @@
             $('#tabelBidang').DataTable({
                 responsive: true,
                 pageLength: 10,
-                order: [[1, 'desc']],
+                order: [],
                 language: { url: "//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json" }
             });
         });
