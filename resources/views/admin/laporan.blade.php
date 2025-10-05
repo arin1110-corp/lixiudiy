@@ -107,14 +107,6 @@
                     </div>
                 </div>
 
-                {{-- Card Grafik --}}
-                <div class="card">
-                    <div class="card-header bg-white fw-bold">Grafik Pendapatan per Periode</div>
-                    <div class="card-body">
-                        <canvas id="grafikPendapatan" height="120"></canvas>
-                    </div>
-                </div>
-
                 {{-- Footer --}}
                 @include('admin.partials.footeradmin')
             </main>
@@ -129,23 +121,6 @@
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 
-    @php
-    // Pastikan $laporans menjadi koleksi yang bisa di-pluck terlepas dari paginator
-    if ($laporans instanceof \Illuminate\Pagination\AbstractPaginator) {
-    $collection = collect($laporans->items());
-    } else {
-    $collection = collect($laporans);
-    }
-
-    $chartLabels = $collection->pluck('laporan_periode_mulai')->map(function ($d) {
-    return \Carbon\Carbon::parse($d)->translatedFormat('F Y');
-    })->toArray();
-
-    $chartData = $collection->pluck('laporan_total_pendapatan')->map(function ($v) {
-    // pastikan numeric
-    return is_numeric($v) ? (float) $v : 0.0;
-    })->toArray();
-    @endphp
 
     <script>
         $(document).ready(function() {
@@ -161,43 +136,6 @@
                     url: "//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json"
                 }
             });
-        });
-
-        // Data grafik dari PHP (dihasilkan di @php di atas)
-        const labels = @json($chartLabels);
-        const dataPendapatan = @json($chartData);
-
-        const ctx = document.getElementById('grafikPendapatan').getContext('2d');
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Pendapatan (Rp)',
-                    data: dataPendapatan,
-                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return 'Rp ' + value.toLocaleString('id-ID');
-                            }
-                        }
-                    }
-                }
-            }
         });
     </script>
 </body>
