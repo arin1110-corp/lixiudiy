@@ -132,6 +132,7 @@
                     [10, 20, 50, 100],
                     [10, 20, 50, 100]
                 ],
+                order: [[1, 'desc']], // <== kolom ke-2 (Tanggal) urut DESC
                 language: {
                     url: "//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json"
                 }
