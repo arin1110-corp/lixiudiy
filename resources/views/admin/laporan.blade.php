@@ -143,7 +143,7 @@
                                 $laporansFiltered = $laporans->filter(function ($lap) use ($tanggalMulai, $tanggalSelesai) {
                                     // Pastikan laporan_tanggal tidak kosong dan bisa di-parse
                                     if (empty($lap->laporan_tanggal)) return false;
-                                    $tLap = \Carbon\Carbon::parse($lap->laporan_tanggal);
+                                    $tLap = \Carbon\Carbon::parse($lap->laporan_periode_mulai);
                                     return $tLap->between($tanggalMulai, $tanggalSelesai);
                                 })->values();
                             }
