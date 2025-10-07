@@ -39,7 +39,13 @@
 
                 {{-- Tombol Cetak PDF --}}
                 <div class="d-flex justify-content-end mb-3">
-                    <a href="{{ route('admin.laporan.cetak') }}" target="_blank" class="btn btn-danger">
+                    <a href="{{ route('admin.laporan.cetak', [
+                        'bulan_mulai' => request('bulan_mulai'),
+                        'bulan_selesai' => request('bulan_selesai'),
+                        'tahun' => request('tahun')
+                    ]) }}" 
+                    target="_blank" 
+                    class="btn btn-danger">
                         <i class="bi bi-file-earmark-pdf-fill"></i> Cetak PDF
                     </a>
                 </div>
