@@ -54,6 +54,7 @@ class HomepageKontrol extends Controller
     {
         $produk = ModelProduk::join('lixiudiy_kategori', 'lixiudiy_produk.produk_kategori', '=', 'lixiudiy_kategori.kategori_id')
             ->select('lixiudiy_produk.*', 'lixiudiy_kategori.kategori_nama')
+            ->where('lixiudiy_produk.produk_status', '1')
             ->paginate(12);
         $kategori = ModelKategori::all();
         $rekomendasi = ModelRekomendasiProduk::join('lixiudiy_produk', 'lixiudiy_rekomendasi_produk.rekomendasi_produk', '=', 'lixiudiy_produk.produk_id')
