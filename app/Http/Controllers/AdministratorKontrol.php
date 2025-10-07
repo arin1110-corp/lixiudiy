@@ -654,15 +654,40 @@ class AdministratorKontrol extends Controller
 
         return redirect()->route('admin.laporan')->with('success', 'Laporan berhasil diproses!');
     }
-    public function cetakPDF()
+    public function cetakPDF(Request $request)
     {
-        // Ambil data laporan
+        // Ambil semua data laporan
         $laporans = DB::table('lixiudiy_laporan_penjualan')
             ->orderBy('laporan_tanggal', 'desc')
             ->get();
 
-        $pdf = Pdf::loadView('admin.laporanpdf', compact('laporans'))
-            ->setPaper('a4', 'portrait'); // bisa ganti 'landscape' kalau mau lebar
+        // Filter berdasarkan periode (jika user memilih)
+        if ($request->filled(['bulan_mulai', 'bulan_selesai', 'tahun'])) {
+            $bMulai = (int) $request->bulan_mulai;
+            $bSelesai = (int) $request->bulan_selesai;
+            $tahun = (int) $request->tahun;
+
+            if ($bMulai > $bSelesai) {
+                [$bMulai, $bSelesai] = [$bSelesai, $bMulai];
+            }
+
+            $tanggalMulai = Carbon::createFromDate($tahun, $bMulai, 1)->startOfMonth();
+            $tanggalSelesai = Carbon::createFromDate($tahun, $bSelesai, 1)->endOfMonth();
+
+            $laporans = $laporans->filter(function ($lap) use ($tanggalMulai, $tanggalSelesai) {
+                if (empty($lap->laporan_periode_mulai)) return false;
+                $tglLap = Carbon::parse($lap->laporan_periode_mulai);
+                return $tglLap->between($tanggalMulai, $tanggalSelesai);
+            });
+        }
+
+        // Generate PDF
+        $pdf = Pdf::loadView('admin.laporanpdf', [
+            'laporans' => $laporans,
+            'bulan_mulai' => $request->bulan_mulai,
+            'bulan_selesai' => $request->bulan_selesai,
+            'tahun' => $request->tahun,
+        ])->setPaper('a4', 'portrait');
 
         return $pdf->download('laporan_penjualan_' . Carbon::now()->format('Ymd_His') . '.pdf');
     }
