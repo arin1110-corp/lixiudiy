@@ -400,10 +400,14 @@ class AdministratorKontrol extends Controller
             'rekomendasi_nama' => 'required|string|max:255',
             'rekomendasi_produk' => 'required',
             'rekomendasi_status' => 'required|integer',
+            'rekomendasi_keterangan' => 'nullable|string',
+            'rekomendasi_tanggal' => 'nullable|date',
         ]);
         $rekomendasi = ModelRekomendasiProduk::findOrFail($id);
         $rekomendasi->rekomendasi_nama = $request->rekomendasi_nama;
         $rekomendasi->rekomendasi_produk = $request->rekomendasi_produk;
+        $rekomendasi->rekomendasi_keterangan = $request->rekomendasi_keterangan;
+        $rekomendasi->rekomendasi_tanggal = $request->rekomendasi_tanggal ? date('Y-m-d', strtotime($request->rekomendasi_tanggal)) : null;
         $rekomendasi->rekomendasi_status = $request->rekomendasi_status ? 1 : 0;
         $rekomendasi->save();
         return redirect()->route('admin.rekomendasi')->with('success', 'Rekomendasi produk berhasil diperbarui.');
