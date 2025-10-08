@@ -33,7 +33,7 @@ class HomepageKontrol extends Controller
             ->select('lixiudiy_produk.*', 'lixiudiy_kategori.kategori_nama')
             ->where('lixiudiy_produk.produk_status', '1')
             ->get();
-        $kategori = ModelKategori::where('kategori_status', '1')->all();
+        $kategori = ModelKategori::where('kategori_status', '1')->get();
         $rekomendasi = ModelRekomendasiProduk::join('lixiudiy_produk', 'lixiudiy_rekomendasi_produk.rekomendasi_produk', '=', 'lixiudiy_produk.produk_id')
             ->select('lixiudiy_rekomendasi_produk.*', 'lixiudiy_produk.produk_nama', 'lixiudiy_produk.*', 'lixiudiy_produk.produk_harga', 'lixiudiy_produk.produk_gambar')
             ->where('lixiudiy_produk.produk_status', '1')
@@ -58,7 +58,7 @@ class HomepageKontrol extends Controller
             ->select('lixiudiy_produk.*', 'lixiudiy_kategori.kategori_nama')
             ->where('lixiudiy_produk.produk_status', '1')
             ->paginate(12);
-        $kategori = ModelKategori::where('kategori_status', '1')->all();
+        $kategori = ModelKategori::where('kategori_status', '1')->get();
         $rekomendasi = ModelRekomendasiProduk::join('lixiudiy_produk', 'lixiudiy_rekomendasi_produk.rekomendasi_produk', '=', 'lixiudiy_produk.produk_id')
             ->select('lixiudiy_rekomendasi_produk.*', 'lixiudiy_produk.produk_nama', 'lixiudiy_produk.*', 'lixiudiy_produk.produk_harga', 'lixiudiy_produk.produk_gambar')
             ->where('lixiudiy_produk.produk_status', '1')
