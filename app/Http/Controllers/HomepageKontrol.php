@@ -37,6 +37,7 @@ class HomepageKontrol extends Controller
         $rekomendasi = ModelRekomendasiProduk::join('lixiudiy_produk', 'lixiudiy_rekomendasi_produk.rekomendasi_produk', '=', 'lixiudiy_produk.produk_id')
             ->select('lixiudiy_rekomendasi_produk.*', 'lixiudiy_produk.produk_nama', 'lixiudiy_produk.*', 'lixiudiy_produk.produk_harga', 'lixiudiy_produk.produk_gambar')
             ->where('lixiudiy_produk.produk_status', '1')
+            ->where('lixiudiy_rekomendasi_produk.rekomendasi_status', '1')
             ->get();
         return view('homepage', [
             'produk' => $produk,
