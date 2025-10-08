@@ -75,7 +75,7 @@
                 <div class="product-card">
                     <img src="{{ $rekomendasip->produk_gambar }}" alt="{{ $rekomendasip->produk_nama }}">
                     <h3>{{ $rekomendasip->rekomendasi_nama }}</h3>
-                    <p>{{ \Illuminate\Support\Str::words($rekomendasip->produk_deskripsi, 20, '...') }}</p>
+                    <p>{{ \Illuminate\Support\Str::words($rekomendasip->rekomendasi_keterangan, 20, '...') }}</p>
                     <a href="{{ route('detailproduk', ['id' => $rekomendasip->rekomendasi_produk]) }}">More</a>
                     <div class="harga">Rp {{ number_format($rekomendasip->produk_harga, 0, ',', '.') }}</div>
                 </div>
