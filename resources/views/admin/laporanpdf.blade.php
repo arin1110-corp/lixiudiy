@@ -35,7 +35,7 @@
         </style>
     </head>
     <body>
-        <h2>Laporan Penjualan - {{ now()->translatedFormat('d F Y') }}</h2>
+        <h2>Laporan Penjualan - {{ \Carbon\Carbon::now('Asia/Makassar')->translatedFormat('d F Y') }}</h2>
 
         <table>
             <thead>
