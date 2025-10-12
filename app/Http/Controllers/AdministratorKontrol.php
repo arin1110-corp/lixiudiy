@@ -17,8 +17,6 @@ use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
 
-
-
 use Illuminate\Http\Request;
 
 class AdministratorKontrol extends Controller
@@ -30,9 +28,8 @@ class AdministratorKontrol extends Controller
     }
     public function loginSubmit(Request $request)
     {
-
         $request->validate([
-            'email'    => 'required|email',
+            'email' => 'required|email',
             'password' => 'required|string',
         ]);
 
@@ -52,10 +49,9 @@ class AdministratorKontrol extends Controller
                 ->withErrors(['password' => 'Password salah.']);
         }
 
-
         // Login sukses
         session([
-            'admin_id'   => $admin->admin_id,
+            'admin_id' => $admin->admin_id,
             'admin_nama' => $admin->admin_nama,
             'admin_email' => $admin->admin_email,
         ]);
@@ -67,22 +63,18 @@ class AdministratorKontrol extends Controller
         $tahun = $request->get('tahun', date('Y'));
 
         // === HITUNG TOTAL DATA ===
-        $produk        = ModelProduk::count();
-        $customer      = ModelCustomer::count();
-        $pengiriman    = ModelPengiriman::count();
-        $pembayaran    = ModelPembayaran::count();
-        $rekomendasi   = ModelRekomendasiProduk::count();
-        $kategori      = ModelKategori::count();
-        $pesanan       = ModelPesanan::count();
-        $keranjang     = ModelKeranjang::count();
-        $totaltrx      = ModelLaporanPenjualan::sum('laporan_total_pendapatan');
+        $produk = ModelProduk::count();
+        $customer = ModelCustomer::count();
+        $pengiriman = ModelPengiriman::count();
+        $pembayaran = ModelPembayaran::count();
+        $rekomendasi = ModelRekomendasiProduk::count();
+        $kategori = ModelKategori::count();
+        $pesanan = ModelPesanan::count();
+        $keranjang = ModelKeranjang::count();
+        $totaltrx = ModelLaporanPenjualan::sum('laporan_total_pendapatan');
 
         // === GRAFIK: Pendapatan per bulan untuk tahun dipilih ===
-        $pendapatanBulanan = ModelLaporanPenjualan::selectRaw('MONTH(laporan_periode_mulai) as bulan, SUM(laporan_total_pendapatan) as total')
-            ->whereYear('laporan_periode_mulai', $tahun)
-            ->groupBy('bulan')
-            ->orderBy('bulan')
-            ->get();
+        $pendapatanBulanan = ModelLaporanPenjualan::selectRaw('MONTH(laporan_periode_mulai) as bulan, SUM(laporan_total_pendapatan) as total')->whereYear('laporan_periode_mulai', $tahun)->groupBy('bulan')->orderBy('bulan')->get();
 
         $namaBulan = [
             1 => 'Jan',
@@ -96,50 +88,45 @@ class AdministratorKontrol extends Controller
             9 => 'Sep',
             10 => 'Okt',
             11 => 'Nov',
-            12 => 'Des'
+            12 => 'Des',
         ];
 
         $chartLabels = $pendapatanBulanan->map(fn($row) => $namaBulan[$row->bulan]);
-        $chartData   = $pendapatanBulanan->pluck('total');
+        $chartData = $pendapatanBulanan->pluck('total');
 
         // === Untuk dropdown tahun ===
-        $listTahun = ModelLaporanPenjualan::selectRaw('YEAR(laporan_periode_mulai) as tahun')
-            ->distinct()
-            ->orderBy('tahun', 'desc')
-            ->pluck('tahun');
+        $listTahun = ModelLaporanPenjualan::selectRaw('YEAR(laporan_periode_mulai) as tahun')->distinct()->orderBy('tahun', 'desc')->pluck('tahun');
 
         if ($request->ajax()) {
             return response()->json([
                 'labels' => $chartLabels,
-                'data'   => $chartData,
+                'data' => $chartData,
             ]);
         }
 
         return view('admin.dashboard', [
-            'tahun'           => $tahun,
-            'listTahun'       => $listTahun,
-            'chartLabels'     => $chartLabels,
-            'chartData'       => $chartData,
-            'totalproduk'     => $produk,
-            'totalCust'       => $customer,
+            'tahun' => $tahun,
+            'listTahun' => $listTahun,
+            'chartLabels' => $chartLabels,
+            'chartData' => $chartData,
+            'totalproduk' => $produk,
+            'totalCust' => $customer,
             'totalPengiriman' => $pengiriman,
             'totalPembayaran' => $pembayaran,
             'totalRekomendasi' => $rekomendasi,
-            'totalKategori'   => $kategori,
-            'totalPesanan'    => $pesanan,
-            'totalKeranjang'  => $keranjang,
-            'totaltrx'        => $totaltrx
+            'totalKategori' => $kategori,
+            'totalPesanan' => $pesanan,
+            'totalKeranjang' => $keranjang,
+            'totaltrx' => $totaltrx,
         ]);
     }
-
 
     // Kelola Data Kategori
     public function kategori()
     {
         $adminId = session('admin_id');
         if (!$adminId) {
-            return redirect()->route('home.page')
-                ->with('error', 'Hanya Untuk Admin');
+            return redirect()->route('home.page')->with('error', 'Hanya Untuk Admin');
         }
         $kategori = ModelKategori::all();
         return view('admin.kategori', compact('kategori'));
@@ -148,8 +135,7 @@ class AdministratorKontrol extends Controller
     {
         $adminId = session('admin_id');
         if (!$adminId) {
-            return redirect()->route('home.page')
-                ->with('error', 'Hanya Untuk Admin');
+            return redirect()->route('home.page')->with('error', 'Hanya Untuk Admin');
         }
         $request->validate([
             'kategori_nama' => 'required|string|max:255',
@@ -180,8 +166,7 @@ class AdministratorKontrol extends Controller
     {
         $adminId = session('admin_id');
         if (!$adminId) {
-            return redirect()->route('home.page')
-                ->with('error', 'Hanya Untuk Admin');
+            return redirect()->route('home.page')->with('error', 'Hanya Untuk Admin');
         }
         $request->validate([
             'kategori_nama' => 'required|string|max:255',
@@ -215,8 +200,7 @@ class AdministratorKontrol extends Controller
     {
         $adminId = session('admin_id');
         if (!$adminId) {
-            return redirect()->route('home.page')
-                ->with('error', 'Hanya Untuk Admin');
+            return redirect()->route('home.page')->with('error', 'Hanya Untuk Admin');
         }
         $kategori = ModelKategori::findOrFail($id);
 
@@ -238,12 +222,9 @@ class AdministratorKontrol extends Controller
     {
         $adminId = session('admin_id');
         if (!$adminId) {
-            return redirect()->route('home.page')
-                ->with('error', 'Hanya Untuk Admin');
+            return redirect()->route('home.page')->with('error', 'Hanya Untuk Admin');
         }
-        $produk = ModelProduk::join('lixiudiy_kategori', 'lixiudiy_produk.produk_kategori', '=', 'lixiudiy_kategori.kategori_id')
-            ->select('lixiudiy_produk.*', 'lixiudiy_kategori.kategori_nama')
-            ->get();
+        $produk = ModelProduk::join('lixiudiy_kategori', 'lixiudiy_produk.produk_kategori', '=', 'lixiudiy_kategori.kategori_id')->select('lixiudiy_produk.*', 'lixiudiy_kategori.kategori_nama')->get();
         $kategori = ModelKategori::all();
         return view('admin.produk', compact('produk', 'kategori'));
     }
@@ -251,8 +232,7 @@ class AdministratorKontrol extends Controller
     {
         $adminId = session('admin_id');
         if (!$adminId) {
-            return redirect()->route('home.page')
-                ->with('error', 'Hanya Untuk Admin');
+            return redirect()->route('home.page')->with('error', 'Hanya Untuk Admin');
         }
         $request->validate([
             'produk_nama' => 'required|string|max:255',
@@ -292,8 +272,7 @@ class AdministratorKontrol extends Controller
     {
         $adminId = session('admin_id');
         if (!$adminId) {
-            return redirect()->route('home.page')
-                ->with('error', 'Hanya Untuk Admin');
+            return redirect()->route('home.page')->with('error', 'Hanya Untuk Admin');
         }
         $request->validate([
             'produk_nama' => 'required|string|max:255',
@@ -333,8 +312,7 @@ class AdministratorKontrol extends Controller
     {
         $adminId = session('admin_id');
         if (!$adminId) {
-            return redirect()->route('home.page')
-                ->with('error', 'Hanya Untuk Admin');
+            return redirect()->route('home.page')->with('error', 'Hanya Untuk Admin');
         }
         $produk = ModelProduk::findOrFail($id);
 
@@ -356,13 +334,9 @@ class AdministratorKontrol extends Controller
     {
         $adminId = session('admin_id');
         if (!$adminId) {
-            return redirect()->route('home.page')
-                ->with('error', 'Hanya Untuk Admin');
+            return redirect()->route('home.page')->with('error', 'Hanya Untuk Admin');
         }
-        $rekomendasi = ModelRekomendasiProduk::join('lixiudiy_produk', 'lixiudiy_rekomendasi_produk.rekomendasi_produk', '=', 'lixiudiy_produk.produk_id')
-            ->join('lixiudiy_kategori', 'lixiudiy_produk.produk_kategori', '=', 'lixiudiy_kategori.kategori_id')
-            ->select('lixiudiy_rekomendasi_produk.*', 'lixiudiy_produk.produk_nama', 'lixiudiy_produk.produk_harga', 'lixiudiy_produk.produk_stok', 'lixiudiy_kategori.kategori_nama')
-            ->get();
+        $rekomendasi = ModelRekomendasiProduk::join('lixiudiy_produk', 'lixiudiy_rekomendasi_produk.rekomendasi_produk', '=', 'lixiudiy_produk.produk_id')->join('lixiudiy_kategori', 'lixiudiy_produk.produk_kategori', '=', 'lixiudiy_kategori.kategori_id')->select('lixiudiy_rekomendasi_produk.*', 'lixiudiy_produk.produk_nama', 'lixiudiy_produk.produk_harga', 'lixiudiy_produk.produk_stok', 'lixiudiy_kategori.kategori_nama')->get();
         $produk = ModelProduk::all();
         return view('admin.rekomendasi', compact('rekomendasi', 'produk'));
     }
@@ -370,8 +344,7 @@ class AdministratorKontrol extends Controller
     {
         $adminId = session('admin_id');
         if (!$adminId) {
-            return redirect()->route('home.page')
-                ->with('error', 'Hanya Untuk Admin');
+            return redirect()->route('home.page')->with('error', 'Hanya Untuk Admin');
         }
         $request->validate([
             'rekomendasi_nama' => 'required|string|max:255',
@@ -393,8 +366,7 @@ class AdministratorKontrol extends Controller
     {
         $adminId = session('admin_id');
         if (!$adminId) {
-            return redirect()->route('home.page')
-                ->with('error', 'Hanya Untuk Admin');
+            return redirect()->route('home.page')->with('error', 'Hanya Untuk Admin');
         }
         $request->validate([
             'rekomendasi_nama' => 'required|string|max:255',
@@ -416,8 +388,7 @@ class AdministratorKontrol extends Controller
     {
         $adminId = session('admin_id');
         if (!$adminId) {
-            return redirect()->route('home.page')
-                ->with('error', 'Hanya Untuk Admin');
+            return redirect()->route('home.page')->with('error', 'Hanya Untuk Admin');
         }
         $rekomendasi = ModelRekomendasiProduk::findOrFail($id);
         // Hapus data dari database
@@ -432,8 +403,7 @@ class AdministratorKontrol extends Controller
     {
         $adminId = session('admin_id');
         if (!$adminId) {
-            return redirect()->route('home.page')
-                ->with('error', 'Hanya Untuk Admin');
+            return redirect()->route('home.page')->with('error', 'Hanya Untuk Admin');
         }
         $customer = ModelCustomer::all();
         return view('admin.customer', compact('customer'));
@@ -445,37 +415,14 @@ class AdministratorKontrol extends Controller
     {
         $adminId = session('admin_id');
         if (!$adminId) {
-            return redirect()->route('home.page')
-                ->with('error', 'Hanya Untuk Admin');
+            return redirect()->route('home.page')->with('error', 'Hanya Untuk Admin');
         }
-        $pembayaran = DB::table('lixiudiy_pembayaran')
-            ->select(
-                'lixiudiy_pembayaran.*',
-                DB::raw('(SELECT customer_nama 
-                  FROM lixiudiy_customer 
-                  JOIN lixiudiy_pesanan 
-                    ON lixiudiy_customer.customer_id = lixiudiy_pesanan.pesanan_customer
-                  WHERE FIND_IN_SET(lixiudiy_pesanan.pesanan_id, REPLACE(lixiudiy_pembayaran.pembayaran_pesanan,";",",")) 
-                  LIMIT 1) as customer_nama')
-            )
-            ->orderBy('pembayaran_id', 'desc')
+        $pembayaran = DB::table('lixiudiy_pesanan')
+            ->join('lixiudiy_pembayaran', 'lixiudiy_pembayaran.pembayaran_pesanan', '=', 'lixiudiy_pesanan.pesanan_id')
+            ->join('lixiudiy_customer', 'lixiudiy_pesanan.pesanan_customer', '=', 'lixiudiy_customer.customer_id')
+            ->join('lixiudiy_produk', 'lixiudiy_pesanan.pesanan_produk', '=', 'lixiudiy_produk.produk_id')
+            ->select('lixiudiy_pembayaran.*', 'lixiudiy_pesanan.*', 'lixiudiy_customer.*', 'lixiudiy_produk.*', 'lixiudiy_produk.produk_gambar')
             ->get();
-
-        foreach ($pembayaran as $p) {
-            $ids = explode(';', trim($p->pembayaran_pesanan, ';'));
-            $p->pesanan = DB::table('lixiudiy_pesanan')
-                ->join('lixiudiy_produk', 'lixiudiy_pesanan.pesanan_produk', '=', 'lixiudiy_produk.produk_id')
-                ->whereIn('pesanan_id', $ids)
-                ->select(
-                    'lixiudiy_produk.produk_nama',
-                    'lixiudiy_produk.produk_harga',
-                    'lixiudiy_pesanan.pesanan_jumlah',
-                    DB::raw('(lixiudiy_produk.produk_harga * lixiudiy_pesanan.pesanan_jumlah) as total')
-                )
-                ->get();
-
-            $p->total_bayar = $p->pesanan->sum('total');
-        }
 
         return view('admin.pesanan', compact('pembayaran'));
     }
@@ -483,8 +430,7 @@ class AdministratorKontrol extends Controller
     {
         $adminId = session('admin_id');
         if (!$adminId) {
-            return redirect()->route('home.page')
-                ->with('error', 'Hanya Untuk Admin');
+            return redirect()->route('home.page')->with('error', 'Hanya Untuk Admin');
         }
         $pembayaran = ModelPembayaran::find($id);
         $pembayaran->pembayaran_status = 1;
@@ -498,45 +444,43 @@ class AdministratorKontrol extends Controller
     {
         $adminId = session('admin_id');
         if (!$adminId) {
-            return redirect()->route('home.page')
-                ->with('error', 'Hanya Untuk Admin');
+            return redirect()->route('home.page')->with('error', 'Hanya Untuk Admin');
         }
-        $pengiriman = ModelPengiriman::all()->map(function ($p) {
-            // Ambil array pesanan dari pengiriman_pesanan
-            $pesananIds = explode(';', $p->pengiriman_pesanan);
+        $pengiriman = ModelPengiriman::orderBy('pengiriman_id', 'desc')
+            ->get()
+            ->map(function ($p) {
+                // Ambil array pesanan dari pengiriman_pesanan
+                $pesananIds = explode(';', $p->pengiriman_pesanan);
 
-            // Ambil data pesanan
-            $pesanan = ModelPesanan::whereIn('pesanan_id', $pesananIds)
-                ->leftJoin('lixiudiy_produk', 'lixiudiy_pesanan.pesanan_produk', '=', 'lixiudiy_produk.produk_id')
-                ->select('lixiudiy_pesanan.*', 'lixiudiy_produk.produk_nama')
-                ->get();
+                // Ambil data pesanan
+                $pesanan = ModelPesanan::whereIn('pesanan_id', $pesananIds)->leftJoin('lixiudiy_produk', 'lixiudiy_pesanan.pesanan_produk', '=', 'lixiudiy_produk.produk_id')->select('lixiudiy_pesanan.*', 'lixiudiy_produk.produk_nama')->get();
 
-            // Ambil pembayaran yang terkait dengan pesanan ini
-            $pembayaran = ModelPembayaran::all()->mapWithKeys(function ($bayar) {
-                $ids = explode(';', $bayar->pembayaran_pesanan);
-                return [$bayar->pembayaran_id => $ids];
-            });
+                // Ambil pembayaran yang terkait dengan pesanan ini
+                $pembayaran = ModelPembayaran::all()->mapWithKeys(function ($bayar) {
+                    $ids = explode(';', $bayar->pembayaran_pesanan);
+                    return [$bayar->pembayaran_id => $ids];
+                });
 
-            // Tambahkan info pembayaran ke setiap pesanan
-            $pesanan->transform(function ($item) use ($pembayaran) {
-                foreach ($pembayaran as $pembayaran_id => $pesanan_ids) {
-                    if (in_array($item->pesanan_id, $pesanan_ids)) {
-                        $item->pembayaran_id = $pembayaran_id;
-                        $item->pembayaran_status = ModelPembayaran::find($pembayaran_id)->pembayaran_status;
-                        break; // stop di pembayaran pertama yang ketemu
+                // Tambahkan info pembayaran ke setiap pesanan
+                $pesanan->transform(function ($item) use ($pembayaran) {
+                    foreach ($pembayaran as $pembayaran_id => $pesanan_ids) {
+                        if (in_array($item->pesanan_id, $pesanan_ids)) {
+                            $item->pembayaran_id = $pembayaran_id;
+                            $item->pembayaran_status = ModelPembayaran::find($pembayaran_id)->pembayaran_status;
+                            break; // stop di pembayaran pertama yang ketemu
+                        }
                     }
-                }
-                return $item;
+                    return $item;
+                });
+
+                // Assign pesanan ke pengiriman
+                $p->pesanan = $pesanan;
+
+                // Jika semua pesanan sudah diverifikasi bayar
+                $p->status_bayar = $pesanan->every(fn($x) => $x->pembayaran_status == 1);
+
+                return $p;
             });
-
-            // Assign pesanan ke pengiriman
-            $p->pesanan = $pesanan;
-
-            // Jika semua pesanan sudah diverifikasi bayar
-            $p->status_bayar = $pesanan->every(fn($x) => $x->pembayaran_status == 1);
-
-            return $p;
-        });
 
         return view('admin.pengiriman', compact('pengiriman'));
     }
@@ -544,8 +488,7 @@ class AdministratorKontrol extends Controller
     {
         $adminId = session('admin_id');
         if (!$adminId) {
-            return redirect()->route('home.page')
-                ->with('error', 'Hanya Untuk Admin');
+            return redirect()->route('home.page')->with('error', 'Hanya Untuk Admin');
         }
         $request->validate([
             'resi' => 'required|string|max:255',
@@ -569,26 +512,17 @@ class AdministratorKontrol extends Controller
     {
         $adminId = session('admin_id');
         if (!$adminId) {
-            return redirect()->route('home.page')
-                ->with('error', 'Hanya Untuk Admin');
+            return redirect()->route('home.page')->with('error', 'Hanya Untuk Admin');
         }
 
         // Ambil data laporan dengan pagination 10 per halaman
-        $laporans = DB::table('lixiudiy_laporan_penjualan')
-            ->orderBy('laporan_tanggal', 'desc')
-            ->get();
+        $laporans = DB::table('lixiudiy_laporan_penjualan')->orderBy('laporan_tanggal', 'desc')->get();
 
         // Ambil data detail pesanan untuk tiap laporan
         foreach ($laporans as $lap) {
             $pesanan = DB::table('lixiudiy_pesanan')
                 ->join('lixiudiy_customer', 'lixiudiy_pesanan.pesanan_customer', '=', 'lixiudiy_customer.customer_id')
-                ->select(
-                    'lixiudiy_pesanan.pesanan_id',
-                    'lixiudiy_pesanan.pesanan_produk',
-                    'lixiudiy_pesanan.pesanan_jumlah',
-                    'lixiudiy_pesanan.pesanan_total_harga',
-                    'lixiudiy_customer.customer_nama'
-                )
+                ->select('lixiudiy_pesanan.pesanan_id', 'lixiudiy_pesanan.pesanan_produk', 'lixiudiy_pesanan.pesanan_jumlah', 'lixiudiy_pesanan.pesanan_total_harga', 'lixiudiy_customer.customer_nama')
                 ->whereBetween('lixiudiy_pesanan.pesanan_tanggal', [$lap->laporan_periode_mulai, $lap->laporan_periode_selesai])
                 ->get();
 
@@ -606,8 +540,7 @@ class AdministratorKontrol extends Controller
     {
         $adminId = session('admin_id');
         if (!$adminId) {
-            return redirect()->route('home.page')
-                ->with('error', 'Hanya Untuk Admin');
+            return redirect()->route('home.page')->with('error', 'Hanya Untuk Admin');
         }
         $request->validate([
             'bulan' => 'required|integer|min:1|max:12',
@@ -617,53 +550,55 @@ class AdministratorKontrol extends Controller
         $bulan = $request->bulan;
         $tahun = $request->tahun;
 
-        // tanggal periode
+        // tanggal periode (full bulan)
         $periode_mulai = Carbon::create($tahun, $bulan, 1)->startOfDay();
         $periode_selesai = Carbon::create($tahun, $bulan, 1)->endOfMonth()->endOfDay();
 
-        // ambil pesanan dari periode
+        // ambil semua pesanan berdasarkan datetime pesanan_tanggal
         $pesanan = ModelPesanan::whereBetween('pesanan_tanggal', [$periode_mulai, $periode_selesai])->get();
 
+        // hitung total
         $totalProduk = $pesanan->sum('pesanan_jumlah'); // sesuaikan field
         $totalPesanan = $pesanan->count();
         $totalPendapatan = $pesanan->sum('pesanan_total_harga'); // sesuaikan field
 
-        // cek laporan sudah ada atau belum
-        $laporan = ModelLaporanPenjualan::where('laporan_periode_mulai', $periode_mulai->toDateString())
-            ->where('laporan_periode_selesai', $periode_selesai->toDateString())
-            ->first();
+        // laporan_tanggal = tanggal 1 bulan berikutnya
+        $laporanTanggal = Carbon::create($tahun, $bulan, 1)->addMonthNoOverflow()->startOfMonth();
+
+        // cek apakah laporan bulan ini sudah ada
+        $laporan = ModelLaporanPenjualan::whereDate('laporan_periode_mulai', $periode_mulai->toDateString())->whereDate('laporan_periode_selesai', $periode_selesai->toDateString())->first();
 
         if ($laporan) {
-            // update
+            // update laporan yang sudah ada
             $laporan->update([
-                'laporan_tanggal' => Carbon::now(),
+                'laporan_tanggal' => $laporanTanggal,
                 'laporan_total_produk' => $totalProduk,
                 'laporan_total_pesanan' => $totalPesanan,
                 'laporan_total_pendapatan' => $totalPendapatan,
-                'laporan_keterangan' => "Update laporan bulan " . $periode_mulai->translatedFormat('F Y'),
+                'laporan_keterangan' => 'Update laporan bulan ' . $periode_mulai->translatedFormat('F Y'),
             ]);
         } else {
-            // insert
+            // insert laporan baru
             ModelLaporanPenjualan::create([
-                'laporan_tanggal' => Carbon::now(),
+                'laporan_tanggal' => $laporanTanggal,
                 'laporan_total_produk' => $totalProduk,
                 'laporan_total_pesanan' => $totalPesanan,
                 'laporan_total_pendapatan' => $totalPendapatan,
-                'laporan_periode_mulai' => $periode_mulai,
-                'laporan_periode_selesai' => $periode_selesai,
-                'laporan_keterangan' => "Laporan bulan " . $periode_mulai->translatedFormat('F Y'),
+                'laporan_periode_mulai' => $periode_mulai->toDateString(),
+                'laporan_periode_selesai' => $periode_selesai->toDateString(),
+                'laporan_keterangan' => 'Laporan bulan ' . $periode_mulai->translatedFormat('F Y'),
                 'laporan_status' => 'active',
             ]);
         }
 
-        return redirect()->route('admin.laporan')->with('success', 'Laporan berhasil diproses!');
+        return redirect()
+            ->route('admin.laporan')
+            ->with('success', 'Laporan bulan ' . $periode_mulai->translatedFormat('F Y') . ' berhasil diproses!');
     }
     public function cetakPDF(Request $request)
     {
         // Ambil semua data laporan
-        $laporans = DB::table('lixiudiy_laporan_penjualan')
-            ->orderBy('laporan_tanggal', 'desc')
-            ->get();
+        $laporans = DB::table('lixiudiy_laporan_penjualan')->orderBy('laporan_tanggal', 'desc')->get();
 
         // Filter berdasarkan periode (jika user memilih)
         if ($request->filled(['bulan_mulai', 'bulan_selesai', 'tahun'])) {
@@ -679,7 +614,9 @@ class AdministratorKontrol extends Controller
             $tanggalSelesai = Carbon::createFromDate($tahun, $bSelesai, 1)->endOfMonth();
 
             $laporans = $laporans->filter(function ($lap) use ($tanggalMulai, $tanggalSelesai) {
-                if (empty($lap->laporan_periode_mulai)) return false;
+                if (empty($lap->laporan_periode_mulai)) {
+                    return false;
+                }
                 $tglLap = Carbon::parse($lap->laporan_periode_mulai);
                 return $tglLap->between($tanggalMulai, $tanggalSelesai);
             });

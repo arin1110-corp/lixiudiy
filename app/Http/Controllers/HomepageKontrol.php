@@ -29,16 +29,9 @@ class HomepageKontrol extends Controller
     //
     public function index()
     {
-        $produk = ModelProduk::join('lixiudiy_kategori', 'lixiudiy_produk.produk_kategori', '=', 'lixiudiy_kategori.kategori_id')
-            ->select('lixiudiy_produk.*', 'lixiudiy_kategori.kategori_nama')
-            ->where('lixiudiy_produk.produk_status', '1')
-            ->get();
+        $produk = ModelProduk::join('lixiudiy_kategori', 'lixiudiy_produk.produk_kategori', '=', 'lixiudiy_kategori.kategori_id')->select('lixiudiy_produk.*', 'lixiudiy_kategori.kategori_nama')->where('lixiudiy_produk.produk_status', '1')->get();
         $kategori = ModelKategori::where('kategori_status', '1')->get();
-        $rekomendasi = ModelRekomendasiProduk::join('lixiudiy_produk', 'lixiudiy_rekomendasi_produk.rekomendasi_produk', '=', 'lixiudiy_produk.produk_id')
-            ->select('lixiudiy_rekomendasi_produk.*', 'lixiudiy_produk.produk_nama', 'lixiudiy_produk.*', 'lixiudiy_produk.produk_harga', 'lixiudiy_produk.produk_gambar')
-            ->where('lixiudiy_produk.produk_status', '1')
-            ->where('lixiudiy_rekomendasi_produk.rekomendasi_status', '1')
-            ->get();
+        $rekomendasi = ModelRekomendasiProduk::join('lixiudiy_produk', 'lixiudiy_rekomendasi_produk.rekomendasi_produk', '=', 'lixiudiy_produk.produk_id')->select('lixiudiy_rekomendasi_produk.*', 'lixiudiy_produk.produk_nama', 'lixiudiy_produk.*', 'lixiudiy_produk.produk_harga', 'lixiudiy_produk.produk_gambar')->where('lixiudiy_produk.produk_status', '1')->where('lixiudiy_rekomendasi_produk.rekomendasi_status', '1')->get();
         return view('homepage', [
             'produk' => $produk,
             'kategori' => $kategori,
@@ -55,59 +48,32 @@ class HomepageKontrol extends Controller
     }
     public function produk()
     {
-        $produk = ModelProduk::join('lixiudiy_kategori', 'lixiudiy_produk.produk_kategori', '=', 'lixiudiy_kategori.kategori_id')
-            ->select('lixiudiy_produk.*', 'lixiudiy_kategori.kategori_nama')
-            ->where('lixiudiy_produk.produk_status', '1')
-            ->paginate(12);
+        $produk = ModelProduk::join('lixiudiy_kategori', 'lixiudiy_produk.produk_kategori', '=', 'lixiudiy_kategori.kategori_id')->select('lixiudiy_produk.*', 'lixiudiy_kategori.kategori_nama')->where('lixiudiy_produk.produk_status', '1')->paginate(12);
         $kategori = ModelKategori::where('kategori_status', '1')->get();
-        $rekomendasi = ModelRekomendasiProduk::join('lixiudiy_produk', 'lixiudiy_rekomendasi_produk.rekomendasi_produk', '=', 'lixiudiy_produk.produk_id')
-            ->select('lixiudiy_rekomendasi_produk.*', 'lixiudiy_produk.produk_nama', 'lixiudiy_produk.*', 'lixiudiy_produk.produk_harga', 'lixiudiy_produk.produk_gambar')
-            ->where('lixiudiy_rekomendasi_produk.rekomendasi_status', '1')
-            ->where('lixiudiy_produk.produk_status', '1')
-            ->get();
+        $rekomendasi = ModelRekomendasiProduk::join('lixiudiy_produk', 'lixiudiy_rekomendasi_produk.rekomendasi_produk', '=', 'lixiudiy_produk.produk_id')->select('lixiudiy_rekomendasi_produk.*', 'lixiudiy_produk.produk_nama', 'lixiudiy_produk.*', 'lixiudiy_produk.produk_harga', 'lixiudiy_produk.produk_gambar')->where('lixiudiy_rekomendasi_produk.rekomendasi_status', '1')->where('lixiudiy_produk.produk_status', '1')->get();
         return view('daftarproduk', compact('produk', 'kategori', 'rekomendasi'));
     }
     public function detailProduk($id)
     {
-        $produk = ModelProduk::findOrFail($id)
-            ->join('lixiudiy_kategori', 'lixiudiy_produk.produk_kategori', '=', 'lixiudiy_kategori.kategori_id')
-            ->select('lixiudiy_produk.*', 'lixiudiy_kategori.kategori_nama')
-            ->where('lixiudiy_produk.produk_id', $id)
-            ->first();
-        $produklain = ModelProduk::join('lixiudiy_kategori', 'lixiudiy_produk.produk_kategori', '=', 'lixiudiy_kategori.kategori_id')
-            ->select('lixiudiy_produk.*', 'lixiudiy_kategori.kategori_nama')
-            ->where('lixiudiy_produk.produk_status', '1')
-            ->paginate(12);
+        $produk = ModelProduk::findOrFail($id)->join('lixiudiy_kategori', 'lixiudiy_produk.produk_kategori', '=', 'lixiudiy_kategori.kategori_id')->select('lixiudiy_produk.*', 'lixiudiy_kategori.kategori_nama')->where('lixiudiy_produk.produk_id', $id)->first();
+        $produklain = ModelProduk::join('lixiudiy_kategori', 'lixiudiy_produk.produk_kategori', '=', 'lixiudiy_kategori.kategori_id')->select('lixiudiy_produk.*', 'lixiudiy_kategori.kategori_nama')->where('lixiudiy_produk.produk_status', '1')->paginate(12);
         $kategori = ModelKategori::all();
-        $rekomendasi = ModelRekomendasiProduk::join('lixiudiy_produk', 'lixiudiy_rekomendasi_produk.rekomendasi_produk', '=', 'lixiudiy_produk.produk_id')
-            ->select('lixiudiy_rekomendasi_produk.*', 'lixiudiy_produk.produk_nama', 'lixiudiy_produk.*', 'lixiudiy_produk.produk_harga', 'lixiudiy_produk.produk_gambar')
-            ->where('lixiudiy_rekomendasi_produk.rekomendasi_status', '1')
-            ->where('lixiudiy_produk.produk_status', '1')
-            ->get();
+        $rekomendasi = ModelRekomendasiProduk::join('lixiudiy_produk', 'lixiudiy_rekomendasi_produk.rekomendasi_produk', '=', 'lixiudiy_produk.produk_id')->select('lixiudiy_rekomendasi_produk.*', 'lixiudiy_produk.produk_nama', 'lixiudiy_produk.*', 'lixiudiy_produk.produk_harga', 'lixiudiy_produk.produk_gambar')->where('lixiudiy_rekomendasi_produk.rekomendasi_status', '1')->where('lixiudiy_produk.produk_status', '1')->get();
         return view('detailproduk', compact('produk', 'kategori', 'rekomendasi', 'produklain'));
     }
     public function daftarprodukkategori($id)
     {
-        $produk = ModelProduk::join('lixiudiy_kategori', 'lixiudiy_produk.produk_kategori', '=', 'lixiudiy_kategori.kategori_id')
-            ->select('lixiudiy_produk.*', 'lixiudiy_kategori.kategori_nama')
-            ->where('lixiudiy_kategori.kategori_id', $id)
-            ->where('lixiudiy_produk.produk_status', '1')
-            ->paginate(6);
+        $produk = ModelProduk::join('lixiudiy_kategori', 'lixiudiy_produk.produk_kategori', '=', 'lixiudiy_kategori.kategori_id')->select('lixiudiy_produk.*', 'lixiudiy_kategori.kategori_nama')->where('lixiudiy_kategori.kategori_id', $id)->where('lixiudiy_produk.produk_status', '1')->paginate(6);
 
         $kategori = ModelKategori::all();
-        $rekomendasi = ModelRekomendasiProduk::join('lixiudiy_produk', 'lixiudiy_rekomendasi_produk.rekomendasi_produk', '=', 'lixiudiy_produk.produk_id')
-            ->select('lixiudiy_rekomendasi_produk.*', 'lixiudiy_produk.produk_nama', 'lixiudiy_produk.*', 'lixiudiy_produk.produk_harga', 'lixiudiy_produk.produk_gambar')
-            ->where('lixiudiy_rekomendasi_produk.rekomendasi_status', '1')
-            ->where('lixiudiy_produk.produk_status', '1')
-            ->get();
+        $rekomendasi = ModelRekomendasiProduk::join('lixiudiy_produk', 'lixiudiy_rekomendasi_produk.rekomendasi_produk', '=', 'lixiudiy_produk.produk_id')->select('lixiudiy_rekomendasi_produk.*', 'lixiudiy_produk.produk_nama', 'lixiudiy_produk.*', 'lixiudiy_produk.produk_harga', 'lixiudiy_produk.produk_gambar')->where('lixiudiy_rekomendasi_produk.rekomendasi_status', '1')->where('lixiudiy_produk.produk_status', '1')->get();
         return view('daftarproduk', compact('produk', 'kategori', 'rekomendasi'));
     }
     public function keranjang()
     {
         $customerId = session('customer_id');
         if (!$customerId) {
-            return redirect()->route('login')
-                ->with('error', 'Silakan login terlebih dahulu untuk mengakses halaman ini.');
+            return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu untuk mengakses halaman ini.');
         }
         $keranjang = ModelKeranjang::where('keranjang_customer', $customerId)
             ->where('keranjang_status', 0) // hanya yang belum checkout
@@ -115,31 +81,25 @@ class HomepageKontrol extends Controller
             ->join('lixiudiy_kategori', 'lixiudiy_produk.produk_kategori', '=', 'lixiudiy_kategori.kategori_id')
             ->select('lixiudiy_keranjang.*', 'lixiudiy_produk.produk_nama', 'lixiudiy_kategori.*', 'lixiudiy_produk.produk_harga', 'lixiudiy_produk.produk_gambar')
             ->get();
-        $rinciantotalharga = ModelKeranjang::where('keranjang_customer', $customerId)
-            ->selectRaw('SUM(keranjang_total_harga) as total_harga, sum(keranjang_jumlah) as total_produk')
-            ->where('keranjang_status', 0)
-            ->first();
+        $rinciantotalharga = ModelKeranjang::where('keranjang_customer', $customerId)->selectRaw('SUM(keranjang_total_harga) as total_harga, sum(keranjang_jumlah) as total_produk')->where('keranjang_status', 0)->first();
         $totalHarga = $keranjang->sum('keranjang_total_harga');
         return view('keranjang', compact('keranjang', 'totalHarga', 'rinciantotalharga'));
     }
     public function tambahkeranjang(Request $request)
     {
         if (!session('customer_id')) {
-            return redirect()->route('login')
-                ->with('error', 'Silakan login terlebih dahulu untuk menambahkan ke keranjang.');
+            return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu untuk menambahkan ke keranjang.');
         }
 
         $request->validate([
             'produk_id' => 'required|exists:lixiudiy_produk,produk_id',
-            'jumlah'    => 'required|integer|min:1',
+            'jumlah' => 'required|integer|min:1',
         ]);
 
         $customerId = session('customer_id');
 
         // Cek apakah produk sudah ada di keranjang
-        $keranjang = ModelKeranjang::where('keranjang_customer', $customerId)
-            ->where('keranjang_produk', $request->produk_id)
-            ->first();
+        $keranjang = ModelKeranjang::where('keranjang_customer', $customerId)->where('keranjang_produk', $request->produk_id)->first();
         $totalHarga = ModelProduk::where('produk_id', $request->produk_id)->value('produk_harga');
         $totalhargahitung = $totalHarga * $request->jumlah;
         // Update total harga di keranjang
@@ -153,11 +113,11 @@ class HomepageKontrol extends Controller
             // Jika belum ada, buat entri baru
             ModelKeranjang::create([
                 'keranjang_customer' => $customerId,
-                'keranjang_produk'   => $request->produk_id,
-                'keranjang_jumlah'   => $request->jumlah,
+                'keranjang_produk' => $request->produk_id,
+                'keranjang_jumlah' => $request->jumlah,
                 'keranjang_total_harga' => $totalhargahitung,
-                'keranjang_tanggal'  => Carbon::now()->format('Y-m-d H:i:s'),
-                'keranjang_status'   => 0, // 0=belum checkout, 1=sudah checkout
+                'keranjang_tanggal' => Carbon::now()->format('Y-m-d H:i:s'),
+                'keranjang_status' => 0, // 0=belum checkout, 1=sudah checkout
             ]);
         }
 
@@ -177,10 +137,7 @@ class HomepageKontrol extends Controller
 
         // Cek stok
         if ($request->jumlah > $produk->produk_stok) {
-            return back()->with(
-                'error',
-                'Jumlah Produk ' . $produk->produk_nama . 'melebihi stok yang tersedia. Maksimal ' . $produk->produk_stok
-            );
+            return back()->with('error', 'Jumlah Produk ' . $produk->produk_nama . 'melebihi stok yang tersedia. Maksimal ' . $produk->produk_stok);
         }
 
         $produkHarga = ModelProduk::where('produk_id', $keranjang->keranjang_produk)->value('produk_harga');
@@ -206,57 +163,44 @@ class HomepageKontrol extends Controller
     {
         $customerId = session('customer_id');
         if (!$customerId) {
-            return redirect()->route('login')
-                ->with('error', 'Silakan login terlebih dahulu untuk checkout.');
+            return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu untuk checkout.');
         }
 
         // Ambil keranjang aktif user
-        $keranjang = ModelKeranjang::where('keranjang_customer', $customerId)
-            ->where('keranjang_status', 0)
-            ->get();
+        $keranjang = ModelKeranjang::where('keranjang_customer', $customerId)->where('keranjang_status', 0)->get();
 
         if ($keranjang->isEmpty()) {
             // Kalau keranjang kosong, langsung arahkan ke pesanan
-            return redirect()->route('pesanan')
-                ->with('info', 'Keranjang kosong. Silakan cek pesanan Anda.');
+            return redirect()->route('pesanan')->with('info', 'Keranjang kosong. Silakan cek pesanan Anda.');
         }
 
         // Simpan tiap item keranjang jadi pesanan
         foreach ($keranjang as $item) {
             ModelPesanan::create([
-                'pesanan_produk'      => $item->keranjang_produk,
-                'pesanan_customer'    => $item->keranjang_customer,
-                'pesanan_keranjang'   => $item->keranjang_id,
-                'pesanan_tanggal'     => now(),
-                'pesanan_jumlah'      => $item->keranjang_jumlah,
+                'pesanan_produk' => $item->keranjang_produk,
+                'pesanan_customer' => $item->keranjang_customer,
+                'pesanan_keranjang' => $item->keranjang_id,
+                'pesanan_tanggal' => now(),
+                'pesanan_jumlah' => $item->keranjang_jumlah,
                 'pesanan_total_harga' => $item->keranjang_total_harga,
-                'pesanan_status'      => 0,
+                'pesanan_status' => 0,
             ]);
 
             // update keranjang jadi status 1
             $item->update(['keranjang_status' => 1]);
         }
 
-        return redirect()->route('pesanan')
-            ->with('success', 'Checkout berhasil. Pesanan sudah dibuat.');
+        return redirect()->route('pesanan')->with('success', 'Checkout berhasil. Pesanan sudah dibuat.');
     }
     public function pemesanan()
     {
         $customerId = session('customer_id');
         if (!$customerId) {
-            return redirect()->route('login')
-                ->with('error', 'Silakan login terlebih dahulu untuk melihat pesanan.');
+            return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu untuk melihat pesanan.');
         }
 
-        $pesanan = ModelPesanan::where('pesanan_customer', $customerId)
-            ->join('lixiudiy_customer', 'lixiudiy_pesanan.pesanan_customer', '=', 'lixiudiy_customer.customer_id')
-            ->join('lixiudiy_produk', 'lixiudiy_pesanan.pesanan_produk', '=', 'lixiudiy_produk.produk_id')
-            ->where('lixiudiy_pesanan.pesanan_status', '0')
-            ->select('lixiudiy_pesanan.*', 'lixiudiy_produk.*', 'lixiudiy_produk.produk_gambar')
-            ->orderBy('pesanan_tanggal', 'desc')
-            ->get();
+        $pesanan = ModelPesanan::where('pesanan_customer', $customerId)->join('lixiudiy_customer', 'lixiudiy_pesanan.pesanan_customer', '=', 'lixiudiy_customer.customer_id')->join('lixiudiy_produk', 'lixiudiy_pesanan.pesanan_produk', '=', 'lixiudiy_produk.produk_id')->where('lixiudiy_pesanan.pesanan_status', '0')->select('lixiudiy_pesanan.*', 'lixiudiy_produk.*', 'lixiudiy_produk.produk_gambar')->orderBy('pesanan_tanggal', 'desc')->get();
         $datacustomer = ModelCustomer::where('customer_id', $customerId)->first();
-
 
         return view('pemesanan', compact('pesanan', 'datacustomer'));
     }
@@ -264,18 +208,11 @@ class HomepageKontrol extends Controller
     {
         $customerId = session('customer_id');
         if (!$customerId) {
-            return redirect()->route('login')
-                ->with('error', 'Silakan login terlebih dahulu untuk melihat pesanan.');
+            return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu untuk melihat pesanan.');
         }
 
         $kurir = ModelKurir::all();
-        $pesanan = ModelPesanan::where('pesanan_customer', $customerId)
-            ->join('lixiudiy_customer', 'lixiudiy_pesanan.pesanan_customer', '=', 'lixiudiy_customer.customer_id')
-            ->join('lixiudiy_produk', 'lixiudiy_pesanan.pesanan_produk', '=', 'lixiudiy_produk.produk_id')
-            ->where('lixiudiy_pesanan.pesanan_status', '0')
-            ->select('lixiudiy_pesanan.*', 'lixiudiy_produk.*', 'lixiudiy_produk.produk_gambar', 'lixiudiy_customer.*')
-            ->orderBy('pesanan_tanggal', 'desc')
-            ->get();
+        $pesanan = ModelPesanan::where('pesanan_customer', $customerId)->join('lixiudiy_customer', 'lixiudiy_pesanan.pesanan_customer', '=', 'lixiudiy_customer.customer_id')->join('lixiudiy_produk', 'lixiudiy_pesanan.pesanan_produk', '=', 'lixiudiy_produk.produk_id')->where('lixiudiy_pesanan.pesanan_status', '0')->select('lixiudiy_pesanan.*', 'lixiudiy_produk.*', 'lixiudiy_produk.produk_gambar', 'lixiudiy_customer.*')->orderBy('pesanan_tanggal', 'desc')->get();
 
         return view('pembayaran', compact('kurir', 'pesanan'));
     }
@@ -283,36 +220,37 @@ class HomepageKontrol extends Controller
     {
         $request->validate([
             'pesanan_id' => 'required',
-            'pembayaran_jumlah' => 'required|numeric',
             'pembayaran_metode' => 'required|string',
-            'kurir' => 'required',
-            'alamat' => 'required',
+            'kurir' => 'required|string',
+            'alamat' => 'required|string',
         ]);
 
+        // Pisahkan semua pesanan_id (contoh: "1;2;3" jadi [1,2,3])
+        $pesananIds = explode(';', $request->pesanan_id);
 
-        $pembayaran = ModelPembayaran::create([
-            'pembayaran_pesanan' => $request->pesanan_id,
-            'pembayaran_jumlah' => $request->pembayaran_jumlah,
-            'pembayaran_tanggal' => now(),
-            'pembayaran_metode' => $request->pembayaran_metode,
-            'pembayaran_status' => '0',
-            'pembayaran_keterangan' => $request->kurir
-        ]);
-        ModelPengiriman::create([
-            'pengiriman_pesanan' => $request->pesanan_id,
-            'pengiriman_jasakurir' => $request->kurir,
-            'pengiriman_alamat' => $request->alamat,
-            'pengiriman_nomor_resi' => '-',
-            'pengiriman_status' => '0',
-            'pengiriman_tanggal' => now(),
-            'pengiriman_keterangan' => '-'
-        ]);
+        foreach ($pesananIds as $pesananId) {
+            // Simpan data pembayaran untuk setiap pesanan
+            $pembayaran = ModelPembayaran::create([
+                'pembayaran_pesanan' => trim($pesananId),
+                'pembayaran_tanggal' => now(),
+                'pembayaran_metode' => $request->pembayaran_metode,
+                'pembayaran_status' => '0', // pending
+                'pembayaran_keterangan' => $request->kurir,
+            ]);
 
-        $pesananid = explode(';', $request->pesanan_id);
-        // update status pesanan jadi "dibayar"
-        ModelPesanan::whereIn('pesanan_id', $pesananid)
-            ->update(['pesanan_status' => '1']);
+            // Simpan data pengiriman juga untuk setiap pesanan
+            ModelPengiriman::create([
+                'pengiriman_pesanan' => trim($pesananId),
+                'pengiriman_jasakurir' => $request->kurir,
+                'pengiriman_nomor_resi' => '-',
+                'pengiriman_tanggal' => now(),
+                'pengiriman_status' => '0', // pending
+                'pengiriman_keterangan' => '-',
+            ]);
+        }
 
+        // Update semua pesanan menjadi status "dibayar"
+        ModelPesanan::whereIn('pesanan_id', $pesananIds)->update(['pesanan_status' => '1']);
 
         return redirect()->route('akun.customer')->with('success', 'Pembayaran berhasil dicatat!');
     }
@@ -321,8 +259,7 @@ class HomepageKontrol extends Controller
     {
         $customerId = session('customer_id');
         if (!$customerId) {
-            return redirect()->route('login')
-                ->with('error', 'Silakan login terlebih dahulu.');
+            return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
         }
 
         $customer = ModelCustomer::find($customerId);
@@ -339,12 +276,12 @@ class HomepageKontrol extends Controller
             ->get();
 
         foreach ($pesananBelumBayar as $p) {
-            $pesanan["new-" . $p->pesanan_id] = [
-                'pembayaran'   => null,
-                'items'        => collect([$p]),
+            $pesanan['new-' . $p->pesanan_id] = [
+                'pembayaran' => null,
+                'items' => collect([$p]),
                 'status_bayar' => 'Belum Dibayar',
-                'kurir'        => null,
-                'action'       => 'bayar',
+                'kurir' => null,
+                'action' => 'bayar',
             ];
         }
 
@@ -352,16 +289,13 @@ class HomepageKontrol extends Controller
         $pembayaran = ModelPembayaran::all();
 
         foreach ($pembayaran as $pay) {
-            $ids = explode(';', $pay->pembayaran_pesanan);
+            $ids = $pay->pembayaran_pesanan;
 
-            $items = DB::table('lixiudiy_pesanan')
-                ->join('lixiudiy_produk', 'lixiudiy_pesanan.pesanan_produk', '=', 'lixiudiy_produk.produk_id')
-                ->whereIn('lixiudiy_pesanan.pesanan_id', $ids)
-                ->where('lixiudiy_pesanan.pesanan_customer', $customerId)
-                ->select('lixiudiy_pesanan.*', 'lixiudiy_produk.*')
-                ->get();
+            $items = DB::table('lixiudiy_pesanan')->join('lixiudiy_produk', 'lixiudiy_pesanan.pesanan_produk', '=', 'lixiudiy_produk.produk_id')->where('lixiudiy_pesanan.pesanan_id', $ids)->where('lixiudiy_pesanan.pesanan_customer', $customerId)->select('lixiudiy_pesanan.*', 'lixiudiy_produk.*')->get();
 
-            if ($items->isEmpty()) continue;
+            if ($items->isEmpty()) {
+                continue;
+            }
 
             if (is_null($pay->pembayaran_status)) {
                 $status_bayar = 'Belum Dibayar';
@@ -378,11 +312,11 @@ class HomepageKontrol extends Controller
             }
 
             $pesanan[$pay->pembayaran_id] = [
-                'pembayaran'   => $pay,
-                'items'        => $items,
+                'pembayaran' => $pay,
+                'items' => $items,
                 'status_bayar' => $status_bayar,
-                'kurir'        => $pay->pembayaran_keterangan,
-                'action'       => $action,
+                'kurir' => $pay->pembayaran_keterangan,
+                'action' => $action,
             ];
         }
 
@@ -390,16 +324,13 @@ class HomepageKontrol extends Controller
         $pengiriman = ModelPengiriman::all();
 
         foreach ($pengiriman as $kirim) {
-            $ids = explode(';', $kirim->pengiriman_pesanan);
+            $ids = $kirim->pengiriman_pesanan;
 
-            $items = DB::table('lixiudiy_pesanan')
-                ->join('lixiudiy_produk', 'lixiudiy_pesanan.pesanan_produk', '=', 'lixiudiy_produk.produk_id')
-                ->whereIn('lixiudiy_pesanan.pesanan_id', $ids)
-                ->where('lixiudiy_pesanan.pesanan_customer', $customerId)
-                ->select('lixiudiy_pesanan.*', 'lixiudiy_produk.*')
-                ->get();
+            $items = DB::table('lixiudiy_pesanan')->join('lixiudiy_produk', 'lixiudiy_pesanan.pesanan_produk', '=', 'lixiudiy_produk.produk_id')->join('lixiudiy_customer', 'lixiudiy_pesanan.pesanan_customer', '=', 'lixiudiy_customer.customer_id')->where('lixiudiy_pesanan.pesanan_id', $ids)->where('lixiudiy_pesanan.pesanan_customer', $customerId)->select('lixiudiy_pesanan.*', 'lixiudiy_produk.*', 'lixiudiy_customer.*')->get();
 
-            if ($items->isEmpty()) continue;
+            if ($items->isEmpty()) {
+                continue;
+            }
 
             if ($kirim->pengiriman_status == 0) {
                 $status_kirim = 'Belum Dikirim';
@@ -412,32 +343,25 @@ class HomepageKontrol extends Controller
             }
 
             $pengirimanindex[$kirim->pengiriman_id] = [
-                'pengiriman'   => $kirim,
-                'items'        => $items,
+                'pengiriman' => $kirim,
+                'items' => $items,
                 'status_kirim' => $status_kirim,
-                'alamat'       => $kirim->pengiriman_alamat,
-                'nomor'        => $kirim->pengiriman_nomor_resi,
-                'kurir'        => $kirim->pengiriman_jasakurir,
+                'alamat' => $items[0]->customer_alamat,
+                'nomor' => $kirim->pengiriman_nomor_resi,
+                'kurir' => $kirim->pengiriman_jasakurir,
             ];
         }
 
-        return view('akuncustomer', compact(
-            'customer',
-            'pesanan',
-            'pengirimanindex'
-        ));
+        return view('akuncustomer', compact('customer', 'pesanan', 'pengirimanindex'));
     }
-
-
-
 
     public function updateCustomer(Request $request)
     {
         $request->validate([
-            'customer_nama'         => 'required|string|max:150',
-            'customer_email'        => 'required|email:rfc,dns',
-            'customer_telepon'      => 'required|string|max:30',
-            'customer_alamat'       => 'required|string|max:255',
+            'customer_nama' => 'required|string|max:150',
+            'customer_email' => 'required|email:rfc,dns',
+            'customer_telepon' => 'required|string|max:30',
+            'customer_alamat' => 'required|string|max:255',
             'customer_tanggallahir' => 'required|date', // format Y-m-d dari <input type="date">
         ]);
 
@@ -462,12 +386,12 @@ class HomepageKontrol extends Controller
     public function registerSubmit(Request $request)
     {
         $request->validate([
-            'customer_nama'         => 'required|string|max:150',
-            'customer_email'        => 'required|email:rfc,dns|unique:lixiudiy_customer,customer_email',
-            'customer_telepon'      => 'required|string|max:30',
-            'customer_alamat'       => 'required|string|max:255',
+            'customer_nama' => 'required|string|max:150',
+            'customer_email' => 'required|email:rfc,dns|unique:lixiudiy_customer,customer_email',
+            'customer_telepon' => 'required|string|max:30',
+            'customer_alamat' => 'required|string|max:255',
             'customer_tanggallahir' => 'required|date',
-            'customer_password'     => 'required|string|min:6',
+            'customer_password' => 'required|string|min:6',
             'password_confirmation' => 'required|same:customer_password',
         ]);
 
@@ -475,13 +399,13 @@ class HomepageKontrol extends Controller
             DB::beginTransaction();
 
             $customer = ModelCustomer::create([
-                'customer_nama'          => $request->customer_nama,
-                'customer_email'         => $request->customer_email,
-                'customer_telepon'       => $request->customer_telepon,
-                'customer_alamat'        => $request->customer_alamat,
-                'customer_tanggallahir'  => $request->customer_tanggallahir,
-                'customer_password'      => Hash::make($request->customer_password),
-                'customer_status'        => 0,
+                'customer_nama' => $request->customer_nama,
+                'customer_email' => $request->customer_email,
+                'customer_telepon' => $request->customer_telepon,
+                'customer_alamat' => $request->customer_alamat,
+                'customer_tanggallahir' => $request->customer_tanggallahir,
+                'customer_password' => Hash::make($request->customer_password),
+                'customer_status' => 0,
                 'customer_tanggaldaftar' => Carbon::now()->format('Y-m-d H:i:s'),
             ]);
 
@@ -491,28 +415,28 @@ class HomepageKontrol extends Controller
 
             ModelAktivasiAkun::create([
                 'aktivasi_customer' => $customer->customer_id,
-                'aktivasi_token'    => $token,
+                'aktivasi_token' => $token,
             ]);
 
             DB::commit();
 
             // === Kirim email aktivasi ===
             Mail::raw("Halo {$customer->customer_nama},\n\nKode aktivasi akunmu adalah: {$token}", function ($message) use ($customer) {
-                $message->to($customer->customer_email)
-                    ->subject('Aktivasi Akun Lixiudiy');
+                $message->to($customer->customer_email)->subject('Aktivasi Akun Lixiudiy');
             });
 
-            return redirect()->route('aktivasi.form')
-                ->with('success', 'Registrasi berhasil. Cek email kamu untuk aktivasi akun.');
+            return redirect()->route('aktivasi.form')->with('success', 'Registrasi berhasil. Cek email kamu untuk aktivasi akun.');
         } catch (\Throwable $e) {
             DB::rollBack();
-            return back()->withInput()->withErrors(['register' => 'Gagal daftar: ' . $e->getMessage()]);
+            return back()
+                ->withInput()
+                ->withErrors(['register' => 'Gagal daftar: ' . $e->getMessage()]);
         }
     }
     public function loginSubmit(Request $request)
     {
         $request->validate([
-            'email'    => 'required|email',
+            'email' => 'required|email',
             'password' => 'required|string',
         ]);
 
@@ -542,12 +466,14 @@ class HomepageKontrol extends Controller
 
         // Login sukses
         session([
-            'customer_id'   => $customer->customer_id,
+            'customer_id' => $customer->customer_id,
             'customer_nama' => $customer->customer_nama,
             'customer_email' => $customer->customer_email,
         ]);
 
-        return redirect()->route('home.page')->with('success', 'Login berhasil, selamat datang ' . $customer->customer_nama . '!');
+        return redirect()
+            ->route('home.page')
+            ->with('success', 'Login berhasil, selamat datang ' . $customer->customer_nama . '!');
     }
     public function aktivasiForm()
     {
@@ -561,16 +487,18 @@ class HomepageKontrol extends Controller
         ]); // sesuaikan max dengan panjang token-mu
         $customer = ModelCustomer::where('customer_email', $request->email)->first();
         if (!$customer) {
-            return back()->withInput()->withErrors(['email' => 'Email tidak ditemukan.']);
+            return back()
+                ->withInput()
+                ->withErrors(['email' => 'Email tidak ditemukan.']);
         }
         if ($customer->customer_status == 1) {
             return redirect()->route('login')->with('info', 'Akun sudah aktif, silakan login.');
         }
-        $aktivasi = ModelAktivasiAkun::where('aktivasi_customer', $customer->customer_id)
-            ->where('aktivasi_token', $request->token)
-            ->first();
+        $aktivasi = ModelAktivasiAkun::where('aktivasi_customer', $customer->customer_id)->where('aktivasi_token', $request->token)->first();
         if (!$aktivasi) {
-            return back()->withInput()->withErrors(['token' => 'Token aktivasi salah.']);
+            return back()
+                ->withInput()
+                ->withErrors(['token' => 'Token aktivasi salah.']);
         }
         // Aktivasi sukses
         $customer->customer_status = 1; // aktif
@@ -596,9 +524,8 @@ class HomepageKontrol extends Controller
     }
     protected function redirectTo($request)
     {
-        if (! $request->expectsJson()) {
-            return redirect()->route('login')
-                ->with('error', 'Silakan login terlebih dahulu untuk mengakses halaman ini.');
+        if (!$request->expectsJson()) {
+            return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu untuk mengakses halaman ini.');
         }
     }
 }

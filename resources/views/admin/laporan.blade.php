@@ -58,7 +58,7 @@
 
                     <div class="card-body">
                         {{-- FORM: Proses Laporan (tetap ada, POST) --}}
-                        <!-- <form action="{{ route('admin.laporan.proses') }}" method="POST" class="d-flex flex-wrap gap-2 mb-3">
+                        <form action="{{ route('admin.laporan.proses') }}" method="POST" class="d-flex flex-wrap gap-2 mb-3">
                             @csrf
                             <select name="bulan" class="form-select w-auto" required>
                                 @for ($m = 1; $m <= 12; $m++)
@@ -75,7 +75,7 @@
                             </select>
 
                             <button type="submit" class="btn btn-primary">Proses Laporan</button>
-                        </form> -->
+                        </form>
 
                         {{-- FORM: Filter Periode Bulan Mulai - Bulan Selesai (GET) --}}
                         @php

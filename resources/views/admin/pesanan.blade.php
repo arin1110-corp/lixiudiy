@@ -80,7 +80,7 @@
                                         <td class="details-control"></td>
                                         <td>BYR{{ $p->pembayaran_id }}</td>
                                         <td>
-                                            {{ \Carbon\Carbon::parse($p->pembayaran_tanggal)->translatedFormat('d F Y') }}
+                                            {{ \Carbon\Carbon::parse($p->pesanan_tanggal)->translatedFormat('d F Y') }}
                                         </td>
                                         <td>{{ $p->customer_nama }}</td>
                                         <td>
@@ -88,7 +88,7 @@
                                         </td>
                                         <td>
                                             Rp
-                                            {{ number_format($p->total_bayar,0,',','.') }}
+                                            {{ number_format($p->pesanan_total_harga,0,',','.') }}
                                         </td>
                                         <td>
                                             @if($p->pembayaran_status == '0')

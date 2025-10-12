@@ -92,13 +92,13 @@
                                             >
                                                 Edit
                                             </button>
-                                            <button
+                                            <!-- <button
                                                 class="btn btn-sm btn-danger btnHapus"
                                                 data-id="{{ $b->kategori_id }}"
                                                 data-nama="{{ $b->kategori_nama }}"
                                             >
                                                 Hapus
-                                            </button>
+                                            </button> -->
                                         </td>
                                     </tr>
                                     @endforeach
