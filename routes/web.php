@@ -15,6 +15,8 @@ Route::get('/produk', [HomepageKontrol::class, 'produk'])->name('produk');
 Route::get('/detailproduk/{id}', [HomepageKontrol::class, 'detailProduk'])->name('detailproduk');
 Route::get('/daftarproduk/kategori/{id}', [HomepageKontrol::class, 'daftarprodukkategori'])->name('daftarprodukkategori');
 Route::get('/login', [HomepageKontrol::class, 'login'])->name('login');
+Route::get('/lupa-password', [HomepageKontrol::class, 'lupaPassword'])->name('customer.lupa_pw');
+Route::post('/lupa-password-submit', [HomepageKontrol::class, 'lupaPasswordSubmit'])->name('customer.proses_lupapassword');
 Route::post('/login-submit', [HomepageKontrol::class, 'loginSubmit'])->name('customer.login');
 Route::get('/register', [HomepageKontrol::class, 'register'])->name('customer.register');
 Route::post('/register-submit', [HomepageKontrol::class, 'registerSubmit'])->name('customer.register.submit');

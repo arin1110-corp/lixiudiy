@@ -76,7 +76,7 @@
             </center>
             <h3 class="text-center mb-4">Login Customer</h3>
 
-            <form method="POST" action="{{ route('customer.login') }}">
+            <form method="POST" action="{{ route('customer.proses_lupapassword') }}">
                 @csrf
                 @if ($errors->any())
                 <div class="alert alert-danger">
@@ -105,9 +105,8 @@
                         required>
                 </div>
 
-
                 <div class="mb-3">
-                    <label for="password" class="form-label fw-bold">Password</label>
+                    <label for="password" class="form-label fw-bold">Password Baru</label>
                     <div class="input-group">
                         <input type="password" class="form-control" id="password" name="password"
                             placeholder="Masukkan password" required>
@@ -117,14 +116,14 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary w-100">Login</button>
+                <button type="submit" class="btn btn-primary w-100">Ganti Password</button>
             </form>
 
             <p class="text-center mt-3 mb-0">
                 Belum punya akun? <a href="{{ route('customer.register') }}">Daftar disini</a>
             </p>
             <p class="text-center mt-3 mb-0">
-                Lupa Password? <a href="{{ route('customer.lupa_pw') }}">Klik Disini</a>
+                Sudah Punya Akun? <a href="{{ route('login') }}">Login Disini</a>
             </p>
         </div>
     </div>

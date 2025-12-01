@@ -132,7 +132,7 @@
                         </div>
                         <div class="mb-3">
                             <label>Harga</label>
-                            <input type="number" class="form-control" name="produk_harga" required />
+                            <input type="text" id="rupiah" class="form-control" name="produk_harga" required />
                         </div>
                         <div class="mb-3">
                             <label>Stok</label>
@@ -200,7 +200,7 @@
                         </div>
                         <div class="mb-3">
                             <label>Harga</label>
-                            <input type="number" class="form-control" name="produk_harga" id="edit_harga"
+                            <input type="text" class="form-control format-angka" name="produk_harga" id="edit_harga"
                                 required />
                         </div>
                         <div class="mb-3">
@@ -345,6 +345,43 @@
             });
         });
     </script>
+    <script>
+        document.getElementById('rupiah').addEventListener('input', function (e) {
+            let value = this.value.replace(/\D/g, ""); // hilangkan selain angka
+
+            // Format ke 10.000
+            value = new Intl.NumberFormat('id-ID').format(value);
+
+            this.value = value;
+        });
+    </script>
+    <script>
+    // Fungsi untuk format angka
+    function formatRibuan(angka) {
+        angka = angka.replace(/\D/g, "");
+        return new Intl.NumberFormat('id-ID').format(angka);
+    }
+
+    // Apply auto-format ketika mengetik
+    document.addEventListener('input', function(e){
+        if(e.target.classList.contains('format-angka')){
+            e.target.value = formatRibuan(e.target.value);
+        }
+    });
+
+    // Format value ketika modal edit dibuka
+    document.addEventListener('show.bs.modal', function (event) {
+
+        let modal = event.target;
+        let input = modal.querySelector('.format-angka');
+
+        if(input){
+            // jika value dari database (misal: 10000)
+            input.value = formatRibuan(input.value);
+        }
+    });
+    </script>
+
 </body>
 
 </html>

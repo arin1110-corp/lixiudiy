@@ -379,6 +379,31 @@ class HomepageKontrol extends Controller
     {
         return view('login');
     }
+    public function lupaPassword()
+    {
+        return view('lupapassword');
+    }
+    public function lupaPasswordSubmit(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string|min:6',
+        ]);
+
+        $customer = ModelCustomer::where('customer_email', $request->email)->first();
+
+        if (!$customer) {
+            return back()
+                ->withInput()
+                ->withErrors(['email' => 'Email tidak ditemukan.']);
+        }
+
+        // Update password
+        $customer->customer_password = Hash::make($request->password);
+        $customer->save();
+
+        return redirect()->route('login')->with('success', 'Password berhasil diubah, silakan login dengan password baru.');
+    }
     public function register()
     {
         return view('daftarakun');

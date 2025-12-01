@@ -258,7 +258,7 @@ class AdministratorKontrol extends Controller
         ModelProduk::create([
             'produk_nama' => $request->produk_nama,
             'produk_deskripsi' => $request->produk_deskripsi,
-            'produk_harga' => $request->produk_harga,
+            'produk_harga' => str_replace('.', '', $request->produk_harga),
             'produk_tanggalmasuk' => $produktanggalmasuk,
             'produk_stok' => $request->produk_stok,
             'produk_gambar' => $gambarPath,
@@ -288,7 +288,7 @@ class AdministratorKontrol extends Controller
         $produk = ModelProduk::findOrFail($id);
         $produk->produk_nama = $request->produk_nama;
         $produk->produk_deskripsi = $request->produk_deskripsi;
-        $produk->produk_harga = $request->produk_harga;
+        $produk->produk_harga = str_replace('.', '', $request->produk_harga);
         $produk->produk_tanggalmasuk = $produktanggalmasuk;
         $produk->produk_stok = $request->produk_stok;
         $produk->produk_kategori = $request->produk_kategori;
