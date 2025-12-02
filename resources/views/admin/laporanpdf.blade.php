@@ -37,13 +37,14 @@
     <body>
         <center>
         <img src="{{ public_path('images/logo.png') }}" style="width:120px; margin:0 auto; display:block;">
-        </center>
-        <center><h1>Lixiu DIY</h1></center>
+        <h1>Lixiu DIY</h1></center>
         <h2>Laporan Penjualan </h2>
         <h2>Periode
-            {{ \Carbon\Carbon::parse($bulan_mulai)->translatedFormat('d F Y') }}
+            {{ \Carbon\Carbon::createFromDate(now()->year, $bulan_mulai, 1)->translatedFormat('d F Y') }}
+
             s/d
-            {{ \Carbon\Carbon::parse($bulan_selesai)->translatedFormat('d F Y') }}
+            {{ \Carbon\Carbon::createFromDate(now()->year, $bulan_selesai, 1)->translatedFormat('d F Y') }}
+
         </h2>
         <h2>Dicetak Tanggal {{ \Carbon\Carbon::now('Asia/Makassar')->translatedFormat('d F Y') }}</h2>
 
