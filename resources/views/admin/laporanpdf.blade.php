@@ -46,7 +46,6 @@
             {{ \Carbon\Carbon::createFromDate(now()->year, $bulan_selesai, 1)->translatedFormat('d F Y') }}
 
         </h2>
-        <h2>Dicetak Tanggal {{ \Carbon\Carbon::now('Asia/Makassar')->translatedFormat('d F Y') }}</h2>
 
         <table>
             <thead>
