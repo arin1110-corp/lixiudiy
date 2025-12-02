@@ -35,7 +35,11 @@
         </style>
     </head>
     <body>
-        <h2>Laporan Penjualan - {{ \Carbon\Carbon::now('Asia/Makassar')->translatedFormat('d F Y') }}</h2>
+        <center>
+        <img src="{{ public_path('images/logo.png') }}" style="width:120px; margin:0 auto; display:block;">
+        </center>
+        <h2>Laporan Penjualan </h2>
+        <h2>Dicetak Tanggal {{ \Carbon\Carbon::now('Asia/Makassar')->translatedFormat('d F Y') }}</h2>
 
         <table>
             <thead>
