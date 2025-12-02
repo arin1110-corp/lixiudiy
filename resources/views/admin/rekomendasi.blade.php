@@ -8,6 +8,8 @@
             rel="stylesheet"
             href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css"
         />
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
     </head>
 
     <body>
@@ -167,11 +169,7 @@
                             </div>
                             <div class="mb-3">
                                 <label>Produk</label>
-                                <select
-                                    class="form-select"
-                                    name="rekomendasi_produk"
-                                    required
-                                >
+                                <select class="form-select select2produk" name="rekomendasi_produk" required>
                                     @foreach ($produk as $k)
                                     <option value="{{ $k->produk_id }}">
                                         {{ $k->produk_nama }}
@@ -259,12 +257,8 @@
                             </div>
                             <div class="mb-3">
                                 <label>Produk</label>
-                                <select
-                                    class="form-select"
-                                    id="edit_produk"
-                                    name="rekomendasi_produk"
-                                    required
-                                >
+                                <select class="form-select select2produk" id="edit_produk" name="rekomendasi_produk" required>
+
                                     @foreach ($produk as $k)
                                     <option value="{{ $k->produk_id }}">
                                         {{ $k->produk_nama }}
@@ -373,10 +367,28 @@
         {{-- DataTables --}}
         <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
         <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
         <script>
             $(document).ready(function () {
-                // Init DataTable
+
+                // Select2 untuk modal Tambah
+                $('#modalTambah .select2produk').select2({
+                    dropdownParent: $('#modalTambah'),
+                    width: '100%',
+                    placeholder: "Cari produk...",
+                    allowClear: true
+                });
+
+                // Select2 untuk modal Edit
+                $('#modalEdit .select2produk').select2({
+                    dropdownParent: $('#modalEdit'),
+                    width: '100%',
+                    placeholder: "Cari produk...",
+                    allowClear: true
+                });
+
+                // DataTable
                 $("#tabelBidang").DataTable({
                     responsive: true,
                     language: {
@@ -384,7 +396,7 @@
                     },
                 });
 
-                // Edit Button
+                // Edit
                 $(".btnEdit").click(function () {
                     let id = $(this).data("id");
                     let nama = $(this).data("nama");
@@ -393,39 +405,17 @@
                     let tanggal = $(this).data("tanggal");
                     let ket = $(this).data("ket");
 
-                    $("#formEdit").attr(
-                        "action",
-                        "/admin/rekomendasi/update/" + id
-                    );
+                    $("#formEdit").attr("action", "/admin/rekomendasi/update/" + id);
                     $("#edit_nama").val(nama);
-                    $("#edit_produk").val(produk);
+                    $("#edit_produk").val(produk).trigger('change');
                     $("#edit_status").val(status);
                     $("#edit_tanggalmasuk").val(tanggal);
                     $("#edit_ket").val(ket);
 
-                    let modalEdit = new bootstrap.Modal(
-                        document.getElementById("modalEdit")
-                    );
-                    modalEdit.show();
-                });
-
-                // Hapus Button
-                $(".btnHapus").click(function () {
-                    let id = $(this).data("id");
-                    let nama = $(this).data("nama");
-
-                    $("#formHapus").attr(
-                        "action",
-                        "/admin/rekomendasi/delete/" + id
-                    );
-                    $("#hapus_nama").text(nama);
-
-                    let modalHapus = new bootstrap.Modal(
-                        document.getElementById("modalHapus")
-                    );
-                    modalHapus.show();
+                    new bootstrap.Modal(document.getElementById("modalEdit")).show();
                 });
             });
+
         </script>
     </body>
 </html>
