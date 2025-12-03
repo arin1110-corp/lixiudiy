@@ -43,7 +43,8 @@
             {{ \Carbon\Carbon::createFromDate(now()->year, $bulan_mulai, 1)->translatedFormat('d F Y') }}
 
             s/d
-            {{ \Carbon\Carbon::createFromDate(now()->year, $bulan_selesai, 1)->translatedFormat('d F Y') }}
+            {{ \Carbon\Carbon::createFromDate(now()->year, $bulan_selesai, 1)->endOfMonth()->translatedFormat('d F Y') }}
+
 
         </h2>
 
